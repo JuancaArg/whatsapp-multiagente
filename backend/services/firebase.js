@@ -3,15 +3,16 @@
 // Importar funciones necesarias desde Firebase SDK
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import dotenv from 'dotenv'
 
 // Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAA9kJJEwxS835FmSi19Pmx77jMkoHVbO8",
-  authDomain: "multiagente-924cd.firebaseapp.com",
-  projectId: "multiagente-924cd",
-  storageBucket: "multiagente-924cd.firebasestorage.app",
-  messagingSenderId: "31715056154",
-  appId: "1:31715056154:web:8fae1307ed4b1d6c9acfa3"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
 };
 
 // Inicializar Firebase

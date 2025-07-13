@@ -1,0 +1,17 @@
+## Documentacion para entornos
+
+# Desarrollo
+
+Backend Puerto = 6000
+Frontend Puerto = 7000
+
+Notas :
+
+- En el backend se debe contar con una capreta llamada public para poder almacenar las sesiones de WhatsappWeb JS
+- Al iniciar el backend con Docker se debe usar un volumen para la carpeta public mencionada anteriorente
+
+# En Produccion
+
+Backend Puerto = 4000
+Frontend Puerto = 3000
+
