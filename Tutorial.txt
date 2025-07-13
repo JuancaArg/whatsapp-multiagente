@@ -2,7 +2,7 @@
 
 # Desarrollo
 
-Backend Puerto = 6000
+Backend Puerto = 8000
 Frontend Puerto = 7000
 
 Notas :
