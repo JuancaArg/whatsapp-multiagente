@@ -66,17 +66,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('list-devices-req', async () => {
-    const data = await ListDevices('Sesiones')
+    const data = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
     socket.emit('list-devices-res', { data: data })
   })
 
   socket.on('list-clients-chat-on-first', async () => {
-    const data = await ListContactChats('Contactos');
+    const data = await ListContactChats(process.env.FIREBASE_COLECCION_CONTACTOS);
     socket.emit('list-clients-chat-emit-first', data)
   })
 
   socket.on('list-clients-chat-content-on-first', async () => {
-    const data = await ListContactContentChats('Chats'); // Limpiado
+    const data = await ListContactContentChats(process.env.FIREBASE_COLECCION_CHATS); // Limpiado
     socket.emit('list-clients-chat-content-emit-first', data) // Limpiado
   })
 
@@ -85,22 +85,22 @@ io.on('connection', (socket) => {
   })
 
   socket.on('message-search-contacto-req', async (e) => {
-    const data = await SearchCollecion('Contactos', e.search);
+    const data = await SearchCollecion(process.env.FIREBASE_COLECCION_CONTACTOS, e.search);
     socket.emit('message-search-contacto-res', { 'data': data })
   })
 
   // Obtiene contenido del chat del clic seleccionado
   
   socket.on('list-clients-content-chat', async (e) => {
-    const data = await SearchContentChat('Chats', e.cCliente, e.cUsuario);
+    const data = await SearchContentChat(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario);
     socket.emit('list-clients-content-chat', { 'data': data })
     const maxTime = Math.max(...data.map(item => new Date(item.time).getTime()));
     const maxDate = new Date(maxTime);
-    await SearchContentChatTimeReal('Chats', e.cCliente, e.cUsuario, maxDate, io , connectedUsers , socket.id);
+    await SearchContentChatTimeReal(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario, maxDate, io , connectedUsers , socket.id);
   })
 
   socket.on('message-search-contacto-elimina', async (e) =>{
-    await SearchContentChatTimeReal('Chats', e.cCliente, e.cUsuario, "", io , connectedUsers , socket.id);
+    await SearchContentChatTimeReal(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario, "", io , connectedUsers , socket.id);
   })
 
 });
@@ -148,7 +148,7 @@ app.post('/get-last-chats-agencia', async (req, res) => {
   }
 
   try {
-    const data = await SearchLastChatsBetweenUsers('Chats', cCliente + '@c.us', cUsuario + '@c.us', 10); // Cambia a 5 si quieres
+    const data = await SearchLastChatsBetweenUsers(process.env.FIREBASE_COLECCION_CHATS, cCliente + '@c.us', cUsuario + '@c.us', 10); // Cambia a 5 si quieres
     res.status(200).json({ data });
   } catch (error) {
     console.error('Error obteniendo los últimos chats:', error);
@@ -164,7 +164,7 @@ app.post('/get-last-chats-agenciall', async (req, res) => {
   }
 
   try {
-    const data = await SearchLastChatsBetweenUsersAll('Chats', cCliente + '@c.us', cUsuario + '@c.us', 10); // Cambia a 5 si quieres
+    const data = await SearchLastChatsBetweenUsersAll(process.env.FIREBASE_COLECCION_CHATS, cCliente + '@c.us', cUsuario + '@c.us', 10); // Cambia a 5 si quieres
     res.status(200).json({ data });
   } catch (error) {
     console.error('Error obteniendo los últimos chats:', error);
