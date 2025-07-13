@@ -1,0 +1,24 @@
+{
+  "name": "apemultiagente",
+  "version": "1.0.0",
+  "description": "Software que permite conectar varios asesores a multiples whatsapp",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "build": "webpack --mode production"
+  },
+  "author": "Juan Carlos Argueda",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "firebase": "^11.1.0",
+    "https": "^1.0.0",
+    "socket.io": "^4.8.1",
+    "whatsapp-web.js": "^1.26.0"
+  }
+}
