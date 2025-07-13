@@ -2,6 +2,10 @@
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth, MessageMedia } = pkg;
 import { addUser, updateUser, ListDevices, addReg, InsertaContacto } from './firebase.js';
+import dotenv from 'dotenv'
+
+// Cargar variables de entorno
+dotenv.config();
 
 import fs from 'fs';
 import path from 'path';
@@ -12,7 +16,7 @@ const clientsMap = new Map();
 
 export async function ObtieneWspConectados(io) {
     try {
-        const clients = await ListDevices('Sesiones');
+        const clients = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
         const sessionsDir = './public/';
         const validFolders = clients.map(client => client.nIdRef);
 
@@ -76,7 +80,7 @@ export async function ObtieneWspConectados(io) {
                 cl.on('message_create', async (message) => {
                     try {
                         const isFromMe = message.fromMe === false;
-                        await InsertaContacto('Contactos', isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
+                        await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
 
                         const data = {
                             from: message.from || 'No definido',
@@ -100,7 +104,7 @@ export async function ObtieneWspConectados(io) {
                             }
                         }
                     
-                        await addReg('Chats', data);
+                        await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
 
 
                         // Logica para mandar mensaje a Microservicio de Google 
@@ -156,7 +160,7 @@ export async function ObtieneWspConectados(io) {
 export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
 
     try {
-        const cConectados = await ListDevices('Sesiones');
+        const cConectados = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
 
         const cfiltrado = cConectados.filter((e) => { return e.nPhoneNumber.includes(usuario) })
         const nIdRef = cfiltrado[0].nIdRef
@@ -227,7 +231,7 @@ export async function createClient(DeviceName, io) {
     client.on('message_create', async (message) => {
                     try {
                         const isFromMe = message.fromMe === false;
-                        await InsertaContacto('Contactos', isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
+                        await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
 
                         const data = {
                             from: message.from || 'No definido',
@@ -251,7 +255,7 @@ export async function createClient(DeviceName, io) {
                             }
                         }
                     
-                        await addReg('Chats', data);
+                        await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
 
 
                         // Logica para mandar mensaje a Microservicio de Google 
@@ -290,7 +294,7 @@ export async function createClient(DeviceName, io) {
                 });
 
     client.on('authenticated', async () => {
-        await updateUser('Sesiones', idFireBase);
+        await updateUser(process.env.FIREBASE_COLECCION_SESIONES, idFireBase);
         io.emit('authenticated', { status: true })
     })
 

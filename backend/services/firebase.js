@@ -5,6 +5,9 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import dotenv from 'dotenv'
 
+// Cargar variables de entorno
+dotenv.config();
+
 // Configuración de Firebase
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -20,7 +23,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Referencia a la colección 'sesiones'
-const sesionesCollection = collection(db, "Sesiones");
+const sesionesCollection = collection(db, process.env.FIREBASE_COLECCION_SESIONES);
 
 // Función para agregar un nuevo documento
 export const addUser = async (newUser) => {
