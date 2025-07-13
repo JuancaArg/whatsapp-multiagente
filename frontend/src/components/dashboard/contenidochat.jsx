@@ -889,7 +889,7 @@ function Cabecerachat({ dataclic, dataclicuser }) {
                         type="button"
                         className="bg-[#ffd140] px-4 py-2 rounded-md shadow-xl text-black font-bold text-sm m-4 cursor-pointer"
                         onClick={() => handleOpenModal()}
-                        value="Generar Link PayPal2" />
+                        value="Generar Link PayPalssss" />
                     <input type="button"
                         className="bg-red-600 px-4 py-2 rounded-md shadow-xl border-2 border-red-600  text-white font-bold text-sm m-4 cursor-pointer"
                         value="Consultar Link PayPal"
