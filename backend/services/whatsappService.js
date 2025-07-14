@@ -3,6 +3,7 @@ import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth, MessageMedia } = pkg;
 import { addUser, updateUser, ListDevices, addReg, InsertaContacto } from './firebase.js';
 import dotenv from 'dotenv'
+import { clientsMap } from '../variables/ChatsTiempoReal.js'; // Importar el mapa de clientes
 
 // Cargar variables de entorno
 dotenv.config();
@@ -12,11 +13,10 @@ import path from 'path';
 
 // Alimenta Objeto Clientes 
 
-const clientsMap = new Map();
-
 export async function ObtieneWspConectados(io) {
     try {
         const clients = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
+        console.log('Clientes conectados:', clients);
         const sessionsDir = './public/';
         const validFolders = clients.map(client => client.nIdRef);
 
@@ -59,23 +59,36 @@ export async function ObtieneWspConectados(io) {
                 }
             });
 
+            clientsMap.set(element.nIdRef, {client : cl, QR : null});
+
             // Esperar a que el cliente esté listo antes de continuar con el siguiente
             await new Promise((resolve, reject) => {
+
+                cl.on('qr', (qr) => {
+                    // Guarda QR en el mapa de clientes
+                    clientsMap.get(element.nIdRef).QR = qr;
+                    console.log(`QR para ${element.cNombreDispositivo}:`, qr);
+                });
             
+                cl.on('authenticated', () => {
+                    console.log(`Sesión autenticada: ${element.cNombreDispositivo}`);
+                });
+
                 cl.on('ready', () => {
                     console.log(`Cliente listo: ${element.cNombreDispositivo}`);
                     resolve();
                 });
                 
-
-                cl.on('authenticated', () => {
-                    console.log(`Sesión autenticada: ${element.cNombreDispositivo}`);
-                });
-
                 cl.on('auth_failure', (error) => {
                     console.error(`Fallo en la autenticación para ${element.cNombreDispositivo}:`, error);
                     reject(error);
                 });
+
+                cl.on('disconnected', (reason) => {
+                console.log('Cliente desconectado. Motivo:', reason);
+                // Aquí puedes reiniciar el cliente y pedir un nuevo QR
+                });
+
 
                 cl.on('message_create', async (message) => {
                     try {
@@ -147,7 +160,6 @@ export async function ObtieneWspConectados(io) {
             });
 
             // Agregar el cliente al mapa después de que esté listo
-            clientsMap.set(element.nIdRef, cl);
         }
 
         console.log('Todos los clientes se han inicializado correctamente.');
@@ -211,22 +223,28 @@ export async function createClient(DeviceName, io) {
         })
     });
 
-    clientsMap.set(idFireBase, client);
+    clientsMap.set(idFireBase, {client: client, QR : null});
 
     // Configurar eventos del cliente
-    client.on('ready', () => {
-        console.log(`Client with session ${DeviceName} is ready!`);
-        io.emit('client-status', { DeviceName, status: 'ready' });
-    });
-
 
     client.on('qr', (qr) => {
-        console.log(`QR for session ${DeviceName} received`);
+        console.log(`QR for session ${DeviceName} received`); 
         console.log(qr);
-
+        // Guarda QR en el mapa de clientes
+        clientsMap.get(idFireBase).QR = qr;
         // Aquí, estamos enviando el QR como una cadena base64 para renderizar en el frontend
         //let qrgenerado = qrcode.generate(qr, {small:true})
         io.emit('qr-code', { DeviceName, qrCodeUrl: qr })
+    });
+
+    client.on('authenticated', async () => {
+        await updateUser(process.env.FIREBASE_COLECCION_SESIONES, idFireBase);
+        io.emit('authenticated', { status: true })
+    })    
+    
+    client.on('ready', () => {
+        console.log(`Client with session ${DeviceName} is ready!`);
+        io.emit('client-status', { DeviceName, status: 'ready' });
     });
 
     client.on('message_create', async (message) => {
@@ -294,11 +312,6 @@ export async function createClient(DeviceName, io) {
                         console.error('Error procesando mensaje:', error);
                     }
                 });
-
-    client.on('authenticated', async () => {
-        await updateUser(process.env.FIREBASE_COLECCION_SESIONES, idFireBase);
-        io.emit('authenticated', { status: true })
-    })
 
     client.on('disconnected', (reason) => {
         console.log(`Client ${DeviceName} disconnected: ${reason}`);
