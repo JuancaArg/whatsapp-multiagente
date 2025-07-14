@@ -15,7 +15,7 @@ const credentials = { key: privateKey, cert: certificate };
 
 import { createClient, ObtieneWspConectados, enviaMensaje } from './services/whatsappService.js';
 import { ListDevices, SearchContentChat, ListContactChats, ListContactosTimeReal, ListContactContentChats, SearchCollecion, SearchContentChatTimeReal , SearchLastChatsBetweenUsers , SearchLastChatsBetweenUsersAll, ClosedSuscripcion_ChatAbierto ,OpenSuscripcion_ChatAbierto } from './services/firebase.js';
-import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS } from './variables/ChatsTiempoReal.js';
+import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS, clientsMap} from './variables/ChatsTiempoReal.js';
 
 
 // Crear la aplicación Express
@@ -145,6 +145,20 @@ io.on('connection', (socket) => {
     
   });
 
+  // Reconectar dispositivo de Whatsapp en base a mapa de Clientes
+
+  socket.on('obtener-qr-reconectar', async (cNombreDispositivo) => {
+    
+    const clientData = clientsMap.get(cNombreDispositivo);
+    
+    if (!clientData) {
+      console.error(`No se encontró el cliente con nombre: ${cNombreDispositivo}`);
+      return;
+    }
+
+    socket.emit('qr-reconectar', clientData.QR || null);
+
+  });
 });
 
 // Pagina Principal
