@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "4000:4000" # Cambia si usas otro puerto
+    environment:
+      - NODE_ENV=development
+    profiles:
+      - prod
+
+  backend-env:
+    build:
+      context: .
+      dockerfile: dockerfile.dev
+    ports:
+      - "8000:8000" # Cambia si usas otro puerto
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    profiles:
+      - dev

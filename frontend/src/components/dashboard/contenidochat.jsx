@@ -544,7 +544,6 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
     }, [handleMymetype]);
 
     const handleSend = () => {
-
         const data = { 'message': message, 'cCliente': dataclic, 'cUsuario': dataclicuser, 'tipomensaje': 'texto' }
         socket.emit('send-message-chat', data)
         setMessage('');
@@ -746,6 +745,7 @@ function DetalleChat({ dataclic, dataclicuser }) {
     // Referencias para almacenar los valores anteriores
 
     useEffect(() => {
+        // Solo se obtienes los valores del chat una vez al cargar el componente
         socket.emit('list-clients-content-chat', { 'cCliente': dataclic, 'cUsuario': dataclicuser });
     }, [dataclic, dataclicuser])
 
@@ -768,6 +768,25 @@ function DetalleChat({ dataclic, dataclicuser }) {
 
     }, [datachatclienteuni])
 
+    // Enviara mensaje en tiempo real cada 1 segundo al backend con que cliente esta chateando
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const body = {
+                online: true,
+                time: Date.now(),
+                cCliente: dataclic,
+                cUsuario: dataclicuser
+            };
+
+            socket.emit('chat-abierto-frontend', body);
+            //console.log('Enviando al backend:', body);
+        }, 1000); // cada 1 segundo
+
+        return () => clearInterval(interval); // limpiar al desmontar
+    }, [dataclic, dataclicuser]);
+
+
     // Agregar nuevos valores recibidor al servidor en tiempo real
 
     // Creando referencias para mantener el valor más actualizado de los estados
@@ -783,22 +802,25 @@ function DetalleChat({ dataclic, dataclicuser }) {
     useEffect(() => {
         socket.on('list-clients-content-chat-added', (e) => {
 
-            // Usar las referencias para acceder a los valores más actuales
-            const filtrado = e.data.filter(item =>
-                (item.from === dataclicRef.current && item.to === dataclicuserRef.current) ||
-                (item.from === dataclicuserRef.current && item.to === dataclicRef.current)
-            );
+            // Usar las referencias para acceder a los valores más actuales 
+            
+            //const filtrado = e.data.filter(item =>
+            //    (item.from === dataclicRef.current && item.to === dataclicuserRef.current) ||
+            //    (item.from === dataclicuserRef.current && item.to === dataclicRef.current)
+            //);
 
             //console.log('filtrado', dataclicRef.current, dataclicuserRef.current, filtrado);
 
             setDatachatclienteuni((prev) => {
+                //console.log(prev);
+                //console.log(e);
                 // Filtrar los elementos duplicados basándonos en el ID
-                const newData = filtrado.filter(item =>
-                    !prev.some(prevItem => prevItem.id === item.id)
-                );
+                //const newData = filtrado.filter(item =>
+                //    !prev.some(prevItem => prevItem.id === item.id)
+                //);
 
                 // Retornar los datos previos más los nuevos sin duplicados
-                return [...prev, ...newData];
+                return [...prev, e.data];
             });
         });
 
