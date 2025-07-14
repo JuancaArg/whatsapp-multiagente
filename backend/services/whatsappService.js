@@ -109,33 +109,34 @@ export async function ObtieneWspConectados(io) {
 
                         // Logica para mandar mensaje a Microservicio de Google 
 
-                        try {                 
-                            
+                        /*
+                        try {
+
                             //console.log(data.body, data.to);
 
                             var myHeaders = new Headers();
                             myHeaders.append("Content-Type", "application/json");
 
                             var raw = JSON.stringify({
-                            "body": data.body,
-                            "to": data.to,
-                            "from": data.from
+                                "body": data.body,
+                                "to": data.to,
+                                "from": data.from
                             });
 
                             var requestOptions = {
-                            method: 'POST',
-                            headers: myHeaders,
-                            body: raw,
-                            redirect: 'follow'
+                                method: 'POST',
+                                headers: myHeaders,
+                                body: raw,
+                                redirect: 'follow'
                             };
 
                             fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
-                            .catch(error => console.log('error', error));                            
+                                .catch(error => console.log('error', error));
 
                         } catch (error) {
                             console.error('Error con el microservicio', error);
                             // No lanzamos error para que el proceso siga
-                        }
+                        }*/
 
                     } catch (error) {
                         console.error('Error procesando mensaje:', error);
@@ -260,33 +261,34 @@ export async function createClient(DeviceName, io) {
 
                         // Logica para mandar mensaje a Microservicio de Google 
 
-                        try {                 
-                            
+                        /*
+                        try {
+
                             //console.log(data.body, data.to);
 
                             var myHeaders = new Headers();
                             myHeaders.append("Content-Type", "application/json");
 
                             var raw = JSON.stringify({
-                            "body": data.body,
-                            "to": data.to,
-                            "from": data.from
+                                "body": data.body,
+                                "to": data.to,
+                                "from": data.from
                             });
 
                             var requestOptions = {
-                            method: 'POST',
-                            headers: myHeaders,
-                            body: raw,
-                            redirect: 'follow'
+                                method: 'POST',
+                                headers: myHeaders,
+                                body: raw,
+                                redirect: 'follow'
                             };
 
                             fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
-                            .catch(error => console.log('error', error));                            
+                                .catch(error => console.log('error', error));
 
                         } catch (error) {
                             console.error('Error con el microservicio', error);
                             // No lanzamos error para que el proceso siga
-                        }
+                        }*/
 
                     } catch (error) {
                         console.error('Error procesando mensaje:', error);

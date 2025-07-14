@@ -1,9 +1,23 @@
 // firebase.js
 
 // Importar funciones necesarias desde Firebase SDK
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import {
+  initializeApp
+} from "firebase/app";
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  onSnapshot,
+  orderBy
+} from "firebase/firestore";
 import dotenv from 'dotenv'
+import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS } from '../variables/ChatsTiempoReal.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -46,7 +60,10 @@ export const updateUser = async (collection, id) => {
   //console.log(collection, id);
   try {
     const docRef = doc(db, collection, id);
-    await updateDoc(docRef, { nIdRef: id, cDataJson: "" });
+    await updateDoc(docRef, {
+      nIdRef: id,
+      cDataJson: ""
+    });
     //console.log("se actualizo registro");
   } catch (error) {
     console.error(error)
@@ -96,7 +113,11 @@ export const ListContactContentChats = async (collect) => {
 
 
 export const ListContactosTimeReal = async (collec, io) => {
-  io.emit('list-clients-chat', { data: { data: [] } })
+  io.emit('list-clients-chat', {
+    data: {
+      data: []
+    }
+  })
 }
 
 // Busqueda en coleccion de firebase
@@ -168,8 +189,8 @@ export const SearchContentChatTimeReal = (collec, cCliente, cUsuario, maxTime, i
   // Si la suscripción ya existe, desuscribirla primero
   if (subscriptions.has(key)) {
     const unsubscribe = subscriptions.get(key);
-    unsubscribe();  // Llamar a la función de desuscripción
-    subscriptions.delete(key);  // Eliminar la suscripción del mapa
+    unsubscribe(); // Llamar a la función de desuscripción
+    subscriptions.delete(key); // Eliminar la suscripción del mapa
     console.log(`Suscripcion Eliminada para ${key}`);
   }
 
@@ -193,7 +214,10 @@ export const SearchContentChatTimeReal = (collec, cCliente, cUsuario, maxTime, i
         .map((change) => {
           if (change.type === "added" || change.type === "modified") {
             const doc = change.doc;
-            const data = { id: doc.id, ...doc.data() };
+            const data = {
+              id: doc.id,
+              ...doc.data()
+            };
             if ((data.from === cCliente && data.to === cUsuario) || (data.from === cUsuario && data.to === cCliente)) {
               return data;
             }
@@ -205,7 +229,9 @@ export const SearchContentChatTimeReal = (collec, cCliente, cUsuario, maxTime, i
       if (datafilter.length > 0) {
         //console.log("Largo del Mensaje :", datafilter.length);
         //console.log('Valores de la funcion: ', collec, cCliente, cUsuario, maxTime);
-        io.emit('list-clients-content-chat-added', { data: datafilter });
+        io.emit('list-clients-content-chat-added', {
+          data: datafilter
+        });
       }
     });
 
@@ -246,8 +272,14 @@ export const SearchLastChatsBetweenUsers = async (collec, cCliente, cUsuario, li
   ]);
 
   const results = [];
-  snapFromTo.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
-  snapToFrom.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
+  snapFromTo.forEach(doc => results.push({
+    id: doc.id,
+    ...doc.data()
+  }));
+  snapToFrom.forEach(doc => results.push({
+    id: doc.id,
+    ...doc.data()
+  }));
 
   // Eliminar duplicados por ID (opcional si no hay repeticiones)
   const map = new Map();
@@ -288,8 +320,14 @@ export const SearchLastChatsBetweenUsersAll = async (collec, cCliente, cUsuario,
   ]);
 
   const results = [];
-  snapFromTo.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
-  snapToFrom.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
+  snapFromTo.forEach(doc => results.push({
+    id: doc.id,
+    ...doc.data()
+  }));
+  snapToFrom.forEach(doc => results.push({
+    id: doc.id,
+    ...doc.data()
+  }));
 
   // Eliminar duplicados por ID (opcional si no hay repeticiones)
   const map = new Map();
@@ -302,3 +340,40 @@ export const SearchLastChatsBetweenUsersAll = async (collec, cCliente, cUsuario,
   // Retornar los últimos N mensajes
   return uniqueResults.slice(0, limitCount);
 };
+
+
+// 20250713 -> Creando la sucripcion en tiempo real con firebase para el socket emit chat-abierto-frontend, validando que este activa
+// la suscripcion mientas el chat este abierto
+
+export const OpenSuscripcion_ChatAbierto = async (io, body_peticion, key) => {
+  try {
+    const q = query(
+      collection(db, process.env.FIREBASE_COLECCION_CHATS),
+      where("from", "in", [body_peticion.cCliente, body_peticion.cUsuario]),
+      where("to", "in", [body_peticion.cCliente, body_peticion.cUsuario]),
+      where("time", ">", new Date().toISOString()),
+      orderBy("time", "asc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          console.log("Nuevo mensaje:", change.doc.data());
+          io.emit('list-clients-content-chat-added',{data : change.doc.data()});
+        }
+      });
+    });
+
+    return { unsubscribe };
+
+  } catch (error) {
+    console.error("Error en Firebase:", error);
+    return { unsubscribe: () => {} }; // Devuelve una función vacía si falla
+  }
+};
+
+export const ClosedSuscripcion_ChatAbierto = (io, body_peticion) => {
+
+  null;
+
+}

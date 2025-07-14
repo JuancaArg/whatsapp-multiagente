@@ -13,9 +13,10 @@ const privateKey = fs.readFileSync('./certs/server.key', 'utf8');
 const certificate = fs.readFileSync('./certs/server.cert', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
-
 import { createClient, ObtieneWspConectados, enviaMensaje } from './services/whatsappService.js';
-import { ListDevices, SearchContentChat, ListContactChats, ListContactosTimeReal, ListContactContentChats, SearchCollecion, SearchContentChatTimeReal , SearchLastChatsBetweenUsers , SearchLastChatsBetweenUsersAll} from './services/firebase.js';
+import { ListDevices, SearchContentChat, ListContactChats, ListContactosTimeReal, ListContactContentChats, SearchCollecion, SearchContentChatTimeReal , SearchLastChatsBetweenUsers , SearchLastChatsBetweenUsersAll, ClosedSuscripcion_ChatAbierto ,OpenSuscripcion_ChatAbierto } from './services/firebase.js';
+import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS } from './variables/ChatsTiempoReal.js';
+
 
 // Crear la aplicación Express
 const app = express();
@@ -32,12 +33,6 @@ const io = new socketIo(server, {
     credentials: true
   }
 });
-
-
-// ListContactosTimeReal
-
-//ListContactosTimeReal('Contactos', io);
-
 
 // Obtiene Datos
 
@@ -94,14 +89,61 @@ io.on('connection', (socket) => {
   socket.on('list-clients-content-chat', async (e) => {
     const data = await SearchContentChat(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario);
     socket.emit('list-clients-content-chat', { 'data': data })
-    const maxTime = Math.max(...data.map(item => new Date(item.time).getTime()));
-    const maxDate = new Date(maxTime);
-    await SearchContentChatTimeReal(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario, maxDate, io , connectedUsers , socket.id);
+    //await SearchContentChatTimeReal(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario, maxDate, io , connectedUsers , socket.id);
   })
 
   socket.on('message-search-contacto-elimina', async (e) =>{
     await SearchContentChatTimeReal(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario, "", io , connectedUsers , socket.id);
   })
+
+  socket.on('chat-abierto-frontend', async (e) => {
+
+    try {
+
+      //Verificacion si e.cCliente y e.cUsuario existen
+      if (!e.cCliente || !e.cUsuario) {
+        console.error('cCliente y cUsuario son requeridos para abrir un chat');
+        return;
+      }
+
+      //Ccliente = Whatsapp del usuario | | cUsuario = Whatsapp del agente de marketing
+      const key = socket.id + e.cCliente + e.cUsuario;
+
+      // Verificar si ya existe una suscripción para este cliente
+      if (Suscripcion_ChatAbierto[key]) {
+
+        clearTimeout(Timer_Expiracion_Chat[key]);
+
+        Timer_Expiracion_Chat[key] = setTimeout(() => {
+          console.log('⛔ Suscripción expirada por inactividad:', key);
+          // Cerrar la suscripción
+          Suscripcion_ChatAbierto[key]?.unsubscribe?.(); // llamamos al unsubscribe guardado
+          delete Suscripcion_ChatAbierto[key];
+          delete Timer_Expiracion_Chat[key];
+        }, TIEMPO_EXPIRACION_MS);
+
+        return;
+      }
+
+    // Creamos suscripción y guardamos el unsubscribe
+    Suscripcion_ChatAbierto[key] = await OpenSuscripcion_ChatAbierto(io, e, key);
+    console.log('⏏️ Suscripción creada por ingreso:', key);
+
+    Timer_Expiracion_Chat[key] = setTimeout(() => {
+      console.log('⛔ Suscripción expirada por inactividad:', key);
+      Suscripcion_ChatAbierto[key]?.unsubscribe?.();
+      delete Suscripcion_ChatAbierto[key];
+      delete Timer_Expiracion_Chat[key];
+    }, TIEMPO_EXPIRACION_MS);
+      
+    } catch (error) {
+
+      console.error('Error al abrir suscripción de chat:', error);
+      socket.emit('error-chat-abierto', { error: 'Error al abrir suscripción de chat' });
+      
+    }
+    
+  });
 
 });
 
@@ -173,7 +215,7 @@ app.post('/get-last-chats-agenciall', async (req, res) => {
 });
 
 // Iniciar el servidor
-const port = process.env.PORT || 4000;
+const port = process.env.PORT;
 server.listen(port, () => {
   console.log(`App is listening on port  ${port}`);
 });
