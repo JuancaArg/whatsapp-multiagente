@@ -148,6 +148,8 @@ io.on('connection', (socket) => {
   // Reconectar dispositivo de Whatsapp en base a mapa de Clientes
 
   socket.on('obtener-qr-reconectar', async (cNombreDispositivo) => {
+
+    //console.log(clientsMap);
     
     const clientData = clientsMap.get(cNombreDispositivo);
     
