@@ -7,6 +7,8 @@ services:
       dockerfile: dockerfile
     ports:
       - "4000:4000" # Cambia si usas otro puerto
+    volumes:
+      - C:\Users\Servidor\Documents\ApeMultiagente\backend\public:/app/public
     environment:
       - NODE_ENV=development
     profiles:

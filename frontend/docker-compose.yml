@@ -6,4 +6,4 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "7000:7000" # Cambia si usas otro puerto
+      - "3000:3000" # Cambia si usas otro puerto

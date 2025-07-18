@@ -262,8 +262,9 @@ function ListadoConexiones({ openReconectar, setOpenReconectar , setData}) {
         }
     }, [estadoactualizacion])
 
-    const handleClickEliminar = (e) => {
-        socket.on("Elimina-Dispositvo",e)
+    const handleClickDesconectar = (e) => {
+        console.log("Desconectando dispositivo:", e.nIdRef);
+        socket.emit("Desconectar-Dispositvo",e.nIdRef)
     }
 
     const handleClickReconectar = (e) => {
@@ -313,7 +314,7 @@ function ListadoConexiones({ openReconectar, setOpenReconectar , setData}) {
                                 </td>
                                 <td className="px-6 py-4 text-center gap-2 flex justify-center items-center">
                                     <button className='bg-yellow-500 py-1 px-2 text-white rounded-lg cursor-pointer' onClick={()=>handleClickReconectar(e)}>Reconectar</button>
-                                    <button className='bg-red-400 py-1 px-2 text-white rounded-lg cursor-pointer' onClick={()=>handleClickEliminar(e.nIdRef)}>Eliminar</button>
+                                    <button className='bg-red-400 py-1 px-2 text-white rounded-lg cursor-pointer' onClick={()=>handleClickDesconectar(e)}>Desconectar</button>
                                 </td>
                             </tr>
                         )
