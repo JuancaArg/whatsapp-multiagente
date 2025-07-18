@@ -102,7 +102,7 @@ io.on('connection', (socket) => {
 
       //Verificacion si e.cCliente y e.cUsuario existen
       if (!e.cCliente || !e.cUsuario) {
-        console.error('cCliente y cUsuario son requeridos para abrir un chat');
+        //console.error('cCliente y cUsuario son requeridos para abrir un chat');
         return;
       }
 
@@ -161,6 +161,26 @@ io.on('connection', (socket) => {
     socket.emit('qr-reconectar', clientData.QR || null);
 
   });
+
+  // Desconectar dispositivo de Whatsapp en base a mapa de Cliente y hacer que se vuelva a conectar
+
+  socket.on('Desconectar-Dispositvo', (cNombreDispositivo) => {
+
+    console.log(`Desconectando cliente: ${cNombreDispositivo}`);
+
+    const clientData = clientsMap.get(cNombreDispositivo);
+
+    if (!clientData) {
+      console.error(`No se encontró el cliente con nombre: ${cNombreDispositivo}`);
+      return;
+    }
+
+    // Desconectar el cliente
+    clientData.client.destroy().then('Cliente desconectado correctamente');
+    clientData.client.initialize().then('Cliente reconectado correctamente');
+
+  });
+
 });
 
 // Pagina Principal

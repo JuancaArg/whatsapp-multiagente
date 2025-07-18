@@ -752,6 +752,7 @@ function DetalleChat({ dataclic, dataclicuser }) {
 
     useEffect(() => {
         // Solo se obtienes los valores del chat una vez al cargar el componente
+        setDatachatclienteuni([]);
         setFirtload(false);
         setLoad(true);
         socket.emit('list-clients-content-chat', { 'cCliente': dataclic, 'cUsuario': dataclicuser });

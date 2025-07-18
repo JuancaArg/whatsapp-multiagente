@@ -86,9 +86,16 @@ export async function ObtieneWspConectados(io) {
                     reject(error);
                 });
 
-                cl.on('disconnected', (reason) => {
+                cl.on('disconnected', async (reason) => {
                 console.log('Cliente desconectado. Motivo:', reason);
-                // Aquí puedes reiniciar el cliente y pedir un nuevo QR
+                // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
+                    try {
+                        await cl.destroy(); // limpia la instancia
+                        await cl.initialize(); // reinicia con la misma sesión
+                    } catch (err) {
+                        console.error('Error al reiniciar el cliente:', err);
+                    }
+
                 });
 
 
@@ -124,7 +131,9 @@ export async function ObtieneWspConectados(io) {
 
                         // Logica para mandar mensaje a Microservicio de Google 
 
-                        /*
+                        /************ */
+
+                        
                         try {
 
                             //console.log(data.body, data.to);
@@ -151,7 +160,9 @@ export async function ObtieneWspConectados(io) {
                         } catch (error) {
                             console.error('Error con el microservicio', error);
                             // No lanzamos error para que el proceso siga
-                        }*/
+                        }
+
+                        /************ */
 
                     } catch (error) {
                         console.error('Error procesando mensaje:', error);
@@ -319,16 +330,16 @@ export async function createClient(DeviceName, io) {
                     }
                 });
 
-    client.on('disconnected', (reason) => {
-        console.log(`Client ${DeviceName} disconnected: ${reason}`);
+    client.on('disconnected', async (reason) => {
+                console.log('Cliente desconectado. Motivo:', reason);
+                // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
+                    try {
+                        await client.destroy(); // limpia la instancia
+                        await client.initialize(); // reinicia con la misma sesión
+                    } catch (err) {
+                        console.error('Error al reiniciar el cliente:', err);
+                    }
 
-        // Intentar reconectar si no es por logout
-        if (reason !== 'user_logout') {
-            setTimeout(() => {
-                console.log(`Reconnecting client ${DeviceName}...`);
-                createClient(DeviceName, io); // Reconectar cliente
-            }, 5000);
-        }
     });
 
     client.initialize();

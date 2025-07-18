@@ -7,9 +7,9 @@ import pkg from '../../../package.json';
 
 const navigation = [
     { name: 'Inicio', current: true },
-    { name: 'Conexiones', current: false},
-    { name: 'Respuestas Rapidas', current: false },
-    { name: 'Integraciones', current: false },
+    { name: 'Conexiones', current: false}//,
+    //{ name: 'Respuestas Rapidas', current: false },
+    //{ name: 'Integraciones', current: false },
 ]
 const userNavigation = [
     { name: 'Mi perfil', href: '#' },
