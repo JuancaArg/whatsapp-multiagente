@@ -10,6 +10,7 @@ dotenv.config();
 
 import fs from 'fs';
 import path from 'path';
+import { time } from 'console';
 
 // Alimenta Objeto Clientes 
 
@@ -56,6 +57,7 @@ export async function ObtieneWspConectados(io) {
                         '--single-process',
                         '--disable-gpu'
                     ],
+                    timeout: 0 
                 }
             });
 
@@ -91,7 +93,7 @@ export async function ObtieneWspConectados(io) {
                 // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
                     try {
                         await cl.destroy(); // limpia la instancia
-                        await cl.initialize(); // reinicia con la misma sesión
+                        await cl.initialize({timeout:0}); // reinicia con la misma sesión
                     } catch (err) {
                         console.error('Error al reiniciar el cliente:', err);
                     }
@@ -169,7 +171,7 @@ export async function ObtieneWspConectados(io) {
                     }
                 });
 
-                cl.initialize();
+                cl.initialize({timeout: 0})
             });
 
             // Agregar el cliente al mapa después de que esté listo
@@ -234,7 +236,26 @@ export async function createClient(DeviceName, io) {
         authStrategy: new LocalAuth({
             dataPath: "./public/" + idFireBase,
             clientId: idFireBase
-        })
+        }),
+        puppeteer: {
+                    // Ejecutar en modo headless (sin interfaz gráfica)
+                    headless: true,
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-infobars',
+                        '--window-position=0,0',
+                        '--ignore-certifcate-errors',
+                        '--ignore-certifcate-errors-spki-list',
+                        '--disable-web-security',
+                        '--disable-site-isolation-trials',
+                        '--no-first-run',
+                        '--no-zygote',
+                        '--single-process',
+                        '--disable-gpu'
+                    ],
+                    timeout: 0 
+        }
     });
 
     clientsMap.set(idFireBase, {client: client, QR : null});
@@ -335,13 +356,13 @@ export async function createClient(DeviceName, io) {
                 // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
                     try {
                         await client.destroy(); // limpia la instancia
-                        await client.initialize(); // reinicia con la misma sesión
+                        await client.initialize({timeout:0}); // reinicia con la misma sesión
                     } catch (err) {
                         console.error('Error al reiniciar el cliente:', err);
                     }
 
     });
 
-    client.initialize();
+    client.initialize({timeout: 0});
     return client;
 }

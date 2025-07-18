@@ -177,7 +177,7 @@ io.on('connection', (socket) => {
 
     // Desconectar el cliente
     clientData.client.destroy().then('Cliente desconectado correctamente');
-    clientData.client.initialize().then('Cliente reconectado correctamente');
+    clientData.client.initialize({timeout:0}).then('Cliente reconectado correctamente');
 
   });
 

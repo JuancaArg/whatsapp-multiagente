@@ -814,6 +814,19 @@ function DetalleChat({ dataclic, dataclicuser }) {
     useEffect(() => {
         socket.on('list-clients-content-chat-added', (e) => {
 
+            //console.log(e);
+            //console.log(dataclicRef,'|' ,dataclicuserRef);
+
+            // filtra e.data donde dataclicRef y dataclicuserRef coincidan
+
+            const mensaje = e.data;
+
+            const esEntreUsuarios =
+                (mensaje.from === dataclicRef.current && mensaje.to === dataclicuserRef.current) ||
+                (mensaje.from === dataclicuserRef.current && mensaje.to === dataclicRef.current);
+
+            console.log('Nuevo mensaje filtrado:', esEntreUsuarios);
+
             // Usar las referencias para acceder a los valores más actuales 
             
             //const filtrado = e.data.filter(item =>
@@ -822,18 +835,14 @@ function DetalleChat({ dataclic, dataclicuser }) {
             //);
 
             //console.log('filtrado', dataclicRef.current, dataclicuserRef.current, filtrado);
-
-            setDatachatclienteuni((prev) => {
-                //console.log(prev);
-                //console.log(e);
-                // Filtrar los elementos duplicados basándonos en el ID
-                //const newData = filtrado.filter(item =>
-                //    !prev.some(prevItem => prevItem.id === item.id)
-                //);
-
-                // Retornar los datos previos más los nuevos sin duplicados
-                return [...prev, e.data];
-            });
+            if (esEntreUsuarios) {
+                setDatachatclienteuni((prev) => {
+                    // Agregar el nuevo mensaje al final, sin eliminar los anteriores
+                    return [...prev, mensaje];
+                });
+            } else {
+                console.log('Mensaje ignorado: no es entre los usuarios seleccionados');
+            }
         });
 
         // Limpiar la suscripción al desmontar el componente
