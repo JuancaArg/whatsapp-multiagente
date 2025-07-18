@@ -3,15 +3,18 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Conexiones from './conexiones';
 import Inicio from './inicio';
 import { useState, useEffect } from 'react';
+import pkg from '../../../package.json';
 
 const navigation = [
     { name: 'Inicio', current: true },
-    { name: 'Conexiones', current: false },
+    { name: 'Conexiones', current: false},
+    { name: 'Respuestas Rapidas', current: false },
+    { name: 'Integraciones', current: false },
 ]
 const userNavigation = [
-    { name: 'Your Profile', href: '#' },
-    { name: 'Settings', href: '#' },
-    { name: 'Sign out', href: '#' },
+    { name: 'Mi perfil', href: '#' },
+    { name: 'Configuraciones', href: '#' },
+    { name: 'Cerrar Sesión', href: '#' },
 ]
 
 function classNames(...classes) {
@@ -27,7 +30,7 @@ export default function Example() {
         name: 'Tom Cook',
         email: 'tom@example.com',
         imageUrl:
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+            'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png',
     };
 
     useEffect(()=>{
@@ -52,13 +55,16 @@ export default function Example() {
                     <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 items-center justify-between">
                             <div className="flex items-center">
-                                <div className="shrink-0">
-                                    <img
+                                <div className="shrink-0 flex flex-row items-end space-x-2">
+                                    <div className="relative h-10 w-auto">
+                                        <img
                                         alt="Your Company"
                                         src="logom.png"
                                         className="h-10 w-auto"
-                                    />
-                                </div>
+                                        />
+                                    </div>
+                                    <p className="text-white text-sm self-end">v {pkg.version}</p>
+                                    </div>
                                 <div className="hidden md:block">
                                     <div className="ml-4 flex items-baseline space-x-4">
                                         {navigation.map((item) => (

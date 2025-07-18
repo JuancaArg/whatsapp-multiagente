@@ -24,6 +24,7 @@ function ModalReconectar({open, setOpen, data, qrReconectar , setQrReconectar, s
 
     useEffect(() => {
         // Enviar QR al modal de reconectar
+        console.log('Enviando solicitud de QR para reconectar:', data.nIdRef);
         socket.emit('obtener-qr-reconectar', data.nIdRef);
     }, [data])
 
@@ -72,7 +73,7 @@ function ModalReconectar({open, setOpen, data, qrReconectar , setQrReconectar, s
                       </p>
                       { qrReconectar ?
                       <QRCodeSVG className='my-2 mt-10' width={200} height={200} value={qrReconectar} />
-                      : <p className='text-sm text-gray-500 mt-10'>Cargando QR...</p>}
+                      : <p className='text-sm text-gray-500 mt-10'>El celular se encuentra conectado o espere un momento si lo desconecto</p>}
                     </div>
                   </div>
                 </div>
@@ -81,9 +82,9 @@ function ModalReconectar({open, setOpen, data, qrReconectar , setQrReconectar, s
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
+                  className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-green-500 sm:ml-3 sm:w-auto"
                 >
-                  Deactivate
+                  Guardar
                 </button>
                 <button
                   type="button"
@@ -91,7 +92,7 @@ function ModalReconectar({open, setOpen, data, qrReconectar , setQrReconectar, s
                   onClick={() => setOpen(false)}
                   className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
                 >
-                  Cancel
+                  Cancelar
                 </button>
               </div>
             </DialogPanel>

@@ -72,6 +72,8 @@ export async function ObtieneWspConectados(io) {
             
                 cl.on('authenticated', () => {
                     console.log(`Sesión autenticada: ${element.cNombreDispositivo}`);
+                    // Update : En esta parte del codigo se elimina el QR del cliente
+                    clientsMap.get(element.nIdRef).QR = null;
                 });
 
                 cl.on('ready', () => {
@@ -173,15 +175,16 @@ export async function ObtieneWspConectados(io) {
 export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
 
     try {
+
         const cConectados = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
 
         const cfiltrado = cConectados.filter((e) => { return e.nPhoneNumber.includes(usuario) })
         const nIdRef = cfiltrado[0].nIdRef
 
-        const cl = clientsMap.get(nIdRef);
+        const Obj = clientsMap.get(nIdRef);
+        const cl = Obj ? Obj.client : null;
 
         if (cl) {
-
             if ( tipomensaje === 'texto' ) {
                 await cl.sendMessage(cliente, mensaje);
             } else if (tipomensaje === 'imagen' || tipomensaje === 'pdf' || tipomensaje === 'audio') {
@@ -238,8 +241,11 @@ export async function createClient(DeviceName, io) {
     });
 
     client.on('authenticated', async () => {
+        console.log(`Client with session ${DeviceName} authenticated!`);
         await updateUser(process.env.FIREBASE_COLECCION_SESIONES, idFireBase);
         io.emit('authenticated', { status: true })
+        // Update : En esta parte del codigo se elimina el QR del cliente
+        clientsMap.get(idFireBase).QR = null;
     })    
     
     client.on('ready', () => {

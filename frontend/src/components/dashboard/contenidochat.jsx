@@ -6,6 +6,7 @@ import { conexiones } from './variables/env';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import AudioRecorder from "./func_audio";
+import { ImSpinner3 } from "react-icons/im";
 
 
 if (window.location.href.includes('192.168.100.100')) {
@@ -522,7 +523,7 @@ function RespuestasRapidas({ respuestarapida, setRespuestarapida, setMensajerrs 
         <>
             {respuestarapida.length === 0 || open === false || rrs.length === 0 ? void 0 :
                 <div className="bg-white py-1 px-4 flex flex-col absolute bottom-[6.5vh] left-0 right-0 overflow-auto max-h-[25rem] rounded-md ml-[6.5rem] w-[84%] shadow-md">
-                    {rrs.map(i => <p className="text-sm font-normal border-gray-300 border-b-[1px] py-4 cursor cursor-pointer" style={{ whiteSpace: 'pre-line' }} onClick={(e) => handleClicRR(e)}>{i}</p>)}
+                    {rrs.map((i,index) => <p className="text-sm font-normal border-gray-300 border-b-[1px] py-4 cursor cursor-pointer" style={{ whiteSpace: 'pre-line' }} onClick={(e) => handleClicRR(e)} key={index} >{i}</p>)}
                 </div>}
 
         </>
@@ -735,38 +736,48 @@ function MensajeEnviadoUsuario({ infodatos }) {
 
 function DetalleChat({ dataclic, dataclicuser }) {
 
-    const [firstload, setFirstload] = useState(true);
+    const [firtload, setFirtload] = useState(true);
+    const [load, setLoad] = useState(true);
     const [datacontentchat, setDataContentchat] = useState([]);
     const [datachatclienteuni, setDatachatclienteuni] = useState([]);
     const [respuestarapida, setRespuestarapida] = useState("");
     const [mensajerrs, setMensajerrs] = useState("");
     const [loading, setLoading] = useState(false);
+    const [scroll , setScroll] = useState(false);
+
+    // Referencia para autoscroll
+    const scrollRef = useRef(null);
 
     // Referencias para almacenar los valores anteriores
 
     useEffect(() => {
         // Solo se obtienes los valores del chat una vez al cargar el componente
+        setFirtload(false);
+        setLoad(true);
         socket.emit('list-clients-content-chat', { 'cCliente': dataclic, 'cUsuario': dataclicuser });
     }, [dataclic, dataclicuser])
 
+    // 1️⃣ Escuchar socket y actualizar mensajes
     useEffect(() => {
-
         socket.on('list-clients-content-chat', (e) => {
-            //setLoading(true);
-            //Cargando loading
-            //console.log('list-clients-content-chat', e.data);
-            // Ordernar e.data por el valor de time
-            setDatachatclienteuni([]);
             const ordenado = e.data.sort((a, b) => new Date(a.time) - new Date(b.time));
             setDatachatclienteuni(ordenado);
-            //setLoading(false);
-        })
+            setScroll(false); // Habilitamos el scroll para que se haga una vez
+            setLoad(false);
+        });
 
         return () => {
             socket.off('list-clients-content-chat');
         };
+    }, []); // Solo se configura una vez el socket
 
-    }, [datachatclienteuni])
+    // 2️⃣ Hacer scroll una vez después de que se rendericen los mensajes
+    useEffect(() => {
+        if (!scroll && scrollRef.current && datachatclienteuni.length > 0) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            setScroll(true);
+        }
+    }, [datachatclienteuni, scroll]); // Se activa cuando se actualizan los mensajes
 
     // Enviara mensaje en tiempo real cada 1 segundo al backend con que cliente esta chateando
 
@@ -842,8 +853,15 @@ function DetalleChat({ dataclic, dataclicuser }) {
 
     return (
         <div className="flex flex-col h-[90%] relative">
-            <div ref={containerRef} className="bg-blue-100 flex flex-col flex-grow overflow-y-auto max-h-full pb-5">
-                <div className="pt-4 px-4 flex flex-col gap-3">
+            {firtload === true ? null :
+                load === true ?
+                <div className="absolute top-1/2 left-1/2">
+                    <ImSpinner3 className="h-10 w-10 animate-spin" />
+                </div>
+                : null
+            }
+            <div ref={scrollRef} className="bg-blue-100 flex flex-col flex-grow overflow-y-auto max-h-full pb-5">
+                <div className="pt-4 px-4 flex flex-col gap-3" ref={scrollRef}>
                     {
                         loading === true ?
                             <div className="bg-[#0F172A] py-3 px-3 rounded-r-md rounded-bl-md max-w-lg flex flex-col break-words">
@@ -853,9 +871,9 @@ function DetalleChat({ dataclic, dataclicuser }) {
                     }
                     {
                         dataclic != '' ?
-                            datachatclienteuni.map(e => {
+                            datachatclienteuni.map((e,index) => {
                                 try {
-                                    return e.fromMe === false ? <MensajeEnviadoCliente infodatos={e} /> : <MensajeEnviadoUsuario infodatos={e} />
+                                    return e.fromMe === false ? <MensajeEnviadoCliente key={index} infodatos={e} /> : <MensajeEnviadoUsuario key={index} infodatos={e}/>
                                 } catch (error) {
                                     console.log(error)
                                 }
