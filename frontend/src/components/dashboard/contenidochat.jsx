@@ -761,7 +761,10 @@ function DetalleChat({ dataclic, dataclicuser }) {
     // 1️⃣ Escuchar socket y actualizar mensajes
     useEffect(() => {
         socket.on('list-clients-content-chat', (e) => {
-            const ordenado = e.data.sort((a, b) => new Date(a.time) - new Date(b.time));
+            const newfilter = e.data.filter(i => {
+                return !(i.to === i.from)
+            })
+            const ordenado = newfilter.sort((a, b) => new Date(a.time) - new Date(b.time));
             setDatachatclienteuni(ordenado);
             setScroll(false); // Habilitamos el scroll para que se haga una vez
             setLoad(false);
