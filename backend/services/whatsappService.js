@@ -192,12 +192,20 @@ export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
         const cConectados = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
 
         const cfiltrado = cConectados.filter((e) => { return e.nPhoneNumber.includes(usuario) })
+
+        if (cfiltrado.length === 0) {
+            throw new Error('No se encontró una sesión para el usuario');
+        }
+
         const nIdRef = cfiltrado[0].nIdRef
 
         const Obj = clientsMap.get(nIdRef);
         const cl = Obj ? Obj.client : null;
 
-        if (cl) {
+        if (!cl) {
+            throw new Error('Cliente no encontrado en clientsMap');
+        }
+
             if ( tipomensaje === 'texto' ) {
                 await cl.sendMessage(cliente, mensaje);
             } else if (tipomensaje === 'imagen' || tipomensaje === 'pdf' || tipomensaje === 'audio') {
@@ -206,7 +214,6 @@ export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
             } else {
                 console.log('Tipo de mensaje no soportado');
             }
-       }
 
     } catch (error) {
 

@@ -20,7 +20,13 @@ import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS, c
 
 
 // Crear la aplicación Express
-const app = express(cors());
+const app = express();
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
+
 app.use(express.json({limit: '50mb'})); // <-- necesario para leer JSON
 
 // Crear servidor HTTP
@@ -177,9 +183,14 @@ io.on('connection', (socket) => {
     }
 
     // Desconectar el cliente
-    clientData.client.destroy().then('Cliente desconectado correctamente');
-    clientData.client.initialize({timeout:0}).then('Cliente reconectado correctamente');
-
+    clientData.client.destroy().then(() => {
+        console.log('Cliente desconectado correctamente');
+        return clientData.client.initialize({ timeout: 0 });
+    }).then(() => {
+        console.log('Cliente reconectado correctamente');
+    }).catch(err => {
+        console.error('Error en el proceso de reinicio del cliente:', err);
+    });
   });
 
 });
