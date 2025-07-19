@@ -317,7 +317,7 @@ export async function createClient(DeviceName, io) {
 
                         // Logica para mandar mensaje a Microservicio de Google 
 
-                        /*
+                        
                         try {
 
                             //console.log(data.body, data.to);
@@ -344,7 +344,7 @@ export async function createClient(DeviceName, io) {
                         } catch (error) {
                             console.error('Error con el microservicio', error);
                             // No lanzamos error para que el proceso siga
-                        }*/
+                        }
 
                     } catch (error) {
                         console.error('Error procesando mensaje:', error);

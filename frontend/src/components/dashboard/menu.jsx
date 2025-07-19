@@ -4,6 +4,24 @@ import Conexiones from './conexiones';
 import Inicio from './inicio';
 import { useState, useEffect } from 'react';
 import pkg from '../../../package.json';
+import { io } from "socket.io-client";
+import { conexiones } from './variables/env';
+
+/*http://localhost:4000/*/
+
+// si la la url tiene la ip 192.168.1.66 se conecta a la ip local
+// si la url tiene la ip http://100.80.67.12:3000 se conecta a la ip publica
+
+if (window.location.href.includes(conexiones.front1)) {
+    var socket = io(conexiones.back1, { 
+        withCredentials: true
+    });
+} else {
+    var socket = io(conexiones.back2, {
+        withCredentials: true
+    });
+}
+
 
 const navigation = [
     { name: 'Inicio', current: true },
@@ -22,6 +40,37 @@ function classNames(...classes) {
 }
 
 export default function Example() {
+
+    const [conectados, setConectados] = useState(false);
+  const [socket, setSocket] = useState(null);
+
+    useEffect(() => {
+        const urlActual = window.location.href;
+        const socketURL = urlActual.includes(conexiones.front1)
+        ? conexiones.back1
+        : conexiones.back2;
+
+        const newSocket = io(socketURL, {
+        withCredentials: true,
+        });
+
+        // Eventos
+        newSocket.on('connect', () => {
+        setConectados(true);
+        });
+
+        newSocket.on('connect_error', () => {
+        setConectados(false);
+        });
+
+        // Guardar socket en el estado si lo necesitas en otras partes
+        setSocket(newSocket);
+
+        // Limpieza al desmontar
+        return () => {
+        newSocket.disconnect();
+        };
+    }, []);
 
     const [opcion, setOpcion] = useState('Inicio');
     const [controladormenu, setControladormenu] = useState(<Inicio />)
@@ -183,6 +232,29 @@ export default function Example() {
                         </div>
                     </DisclosurePanel>
                 </Disclosure>
+                <div className={`${conectados ? 'bg-green-600' : 'bg-red-500'} h-9 flex flex-row items-center justify-center`}>
+                <p className='text-center text-xs text-white font-bold'>
+                    {
+                    conectados
+                        ? '✅ Estás conectado y tienes los permisos de acceso necesarios'
+                        : (
+                        window.location.href.includes(conexiones.front1)
+                            ? (
+                            <>
+                                Estas presencial, pero te faltan los permisos de acceso ➡️{' '}
+                                <a href={conexiones.back1} target='_blank' className="underline text-blue-200">Dar Permisos</a>
+                            </>
+                            )
+                            : (
+                            <>
+                                Estas en remoto, pero te faltan los permisos de acceso ➡️{' '}
+                                <a href={conexiones.back2} target='_blank' className="underline text-blue-200">Dar Permisos</a>
+                            </>
+                            )
+                        )
+                    }
+                </p>
+                </div>
                 {controladormenu}
             </div>
         </>
