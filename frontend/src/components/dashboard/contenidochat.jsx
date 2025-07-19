@@ -9,7 +9,7 @@ import AudioRecorder from "./func_audio";
 import { ImSpinner3 } from "react-icons/im";
 
 
-if (window.location.href.includes('192.168.100.100')) {
+if (window.location.href.includes(conexiones.front1)) {
     var socket = io(conexiones.back1, {
         withCredentials: true
     });
@@ -813,6 +813,8 @@ function DetalleChat({ dataclic, dataclicuser }) {
 
     useEffect(() => {
         socket.on('list-clients-content-chat-added', (e) => {
+
+            console.log('Nuevo mensaje recibido:', e.data);
 
             //console.log(e);
             //console.log(dataclicRef,'|' ,dataclicuserRef);

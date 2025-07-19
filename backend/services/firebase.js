@@ -14,7 +14,8 @@ import {
   query,
   where,
   onSnapshot,
-  orderBy
+  orderBy,
+  limit
 } from "firebase/firestore";
 import dotenv from 'dotenv'
 import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS } from '../variables/ChatsTiempoReal.js';
@@ -175,6 +176,30 @@ export const SearchContentChat = async (collec, cCliente, cUsuario) => {
   return data;
 }
 
+// Funcion para extraer los ultimo 40 mensajes de un chat
+
+export const BuscaUltimosMensajes = async (collec, cCliente, cUsuario, limitCount = 70) => {
+
+  const searchRef = collection(db, collec);
+  const q = query(
+    searchRef,
+    where("from", "in", [cCliente, cUsuario]),
+    where("to", "in", [cCliente, cUsuario]),
+    orderBy("time", "desc"), // Ordenar por fecha descendente
+    limit(limitCount) // Limitar a los últimos 40 mensajes
+  );
+
+  const querySnapshot = await getDocs(q);
+  const data = [];
+  querySnapshot.forEach((doc) => {
+    data.push(
+      doc.data()
+    );
+  });
+  // Ordenar los mensajes por fecha ascendente antes de devolverlos
+  data.sort((a, b) => new Date(a.time) - new Date(b.time));
+  return data;
+}
 
 // Obtener los elementos que se cambiaron en la coleccion de firebase "Chats" segun el chat seleccionado
 
@@ -345,7 +370,7 @@ export const SearchLastChatsBetweenUsersAll = async (collec, cCliente, cUsuario,
 // 20250713 -> Creando la sucripcion en tiempo real con firebase para el socket emit chat-abierto-frontend, validando que este activa
 // la suscripcion mientas el chat este abierto
 
-export const OpenSuscripcion_ChatAbierto = async (io, body_peticion, key) => {
+export const OpenSuscripcion_ChatAbierto = async (io, body_peticion, key , socketid) => {
   try {
     const q = query(
       collection(db, process.env.FIREBASE_COLECCION_CHATS),
@@ -359,7 +384,7 @@ export const OpenSuscripcion_ChatAbierto = async (io, body_peticion, key) => {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           console.log("Nuevo mensaje:", change.doc.data());
-          io.emit('list-clients-content-chat-added',{data : change.doc.data()});
+          io.to(socketid).emit('list-clients-content-chat-added',{data : change.doc.data()});
         }
       });
     });

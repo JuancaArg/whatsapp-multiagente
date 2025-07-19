@@ -5,6 +5,7 @@ import fs from 'fs';
 import https from 'https';
 import { Server as socketIo } from 'socket.io';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -14,12 +15,12 @@ const certificate = fs.readFileSync('./certs/server.cert', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
 import { createClient, ObtieneWspConectados, enviaMensaje } from './services/whatsappService.js';
-import { ListDevices, SearchContentChat, ListContactChats, ListContactosTimeReal, ListContactContentChats, SearchCollecion, SearchContentChatTimeReal , SearchLastChatsBetweenUsers , SearchLastChatsBetweenUsersAll, ClosedSuscripcion_ChatAbierto ,OpenSuscripcion_ChatAbierto } from './services/firebase.js';
+import { ListDevices, SearchContentChat, ListContactChats, ListContactosTimeReal, ListContactContentChats, SearchCollecion, SearchContentChatTimeReal , SearchLastChatsBetweenUsers , SearchLastChatsBetweenUsersAll, ClosedSuscripcion_ChatAbierto ,OpenSuscripcion_ChatAbierto, BuscaUltimosMensajes } from './services/firebase.js';
 import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS, clientsMap} from './variables/ChatsTiempoReal.js';
 
 
 // Crear la aplicación Express
-const app = express();
+const app = express(cors());
 app.use(express.json({limit: '50mb'})); // <-- necesario para leer JSON
 
 // Crear servidor HTTP
@@ -87,7 +88,7 @@ io.on('connection', (socket) => {
   // Obtiene contenido del chat del clic seleccionado
   
   socket.on('list-clients-content-chat', async (e) => {
-    const data = await SearchContentChat(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario);
+    const data = await BuscaUltimosMensajes(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario);
     socket.emit('list-clients-content-chat', { 'data': data })
     //await SearchContentChatTimeReal(process.env.FIREBASE_COLECCION_CHATS, e.cCliente, e.cUsuario, maxDate, io , connectedUsers , socket.id);
   })
@@ -115,7 +116,7 @@ io.on('connection', (socket) => {
         clearTimeout(Timer_Expiracion_Chat[key]);
 
         Timer_Expiracion_Chat[key] = setTimeout(() => {
-          console.log('⛔ Suscripción expirada por inactividad:', key);
+          //console.log('⛔ Suscripción expirada por inactividad:', key);
           // Cerrar la suscripción
           Suscripcion_ChatAbierto[key]?.unsubscribe?.(); // llamamos al unsubscribe guardado
           delete Suscripcion_ChatAbierto[key];
@@ -126,11 +127,11 @@ io.on('connection', (socket) => {
       }
 
     // Creamos suscripción y guardamos el unsubscribe
-    Suscripcion_ChatAbierto[key] = await OpenSuscripcion_ChatAbierto(io, e, key);
-    console.log('⏏️ Suscripción creada por ingreso:', key);
+    Suscripcion_ChatAbierto[key] = await OpenSuscripcion_ChatAbierto(io, e, key , socket.id);
+    //console.log('⏏️ Suscripción creada por ingreso:', key);
 
     Timer_Expiracion_Chat[key] = setTimeout(() => {
-      console.log('⛔ Suscripción expirada por inactividad:', key);
+      //console.log('⛔ Suscripción expirada por inactividad:', key);
       Suscripcion_ChatAbierto[key]?.unsubscribe?.();
       delete Suscripcion_ChatAbierto[key];
       delete Timer_Expiracion_Chat[key];

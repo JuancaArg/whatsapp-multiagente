@@ -3,7 +3,7 @@ import { use, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { conexiones } from './variables/env';
 
-if (window.location.href.includes('192.168.100.100')) {
+if (window.location.href.includes(conexiones.front1)) {
     var socket = io(conexiones.back1, {
         withCredentials: true
     });
