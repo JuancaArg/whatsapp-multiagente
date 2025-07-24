@@ -310,56 +310,65 @@ function ListadoConexiones({ openReconectar, setOpenReconectar, setData }) {
     }
 
     // Tabla con estilos para mostrar productos
-    return (<>
-        <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">
-                            Nombre WhatsApp
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Numero WhatsApp
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Identificador
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Estado
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-center">
-                            Opciones
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        dispoitivos.map((e, i) =>
-                            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={i}>
-                                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    {e.cNombreDispositivo}
-                                </th>
-                                <td className="px-6 py-4">
-                                    {e.cNombreDispositivo}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {e.nIdRef}
-                                </td>
-                                <td className="px-6 py-4">
-                                    🟠 Procesando
-                                </td>
-                                <td className="px-6 py-4 text-center gap-2 flex justify-center items-center">
-                                    <button className='bg-yellow-500 py-1 px-2 text-white rounded-lg cursor-pointer' onClick={() => handleClickReconectar(e)}>Reconectar</button>
-                                    <button className='bg-red-400 py-1 px-2 text-white rounded-lg cursor-pointer' onClick={() => handleClickDesconectar(e)}>Desconectar</button>
-                                    <button className='bg-green-500 py-1 px-2 text-white rounded-lg cursor-pointer' onClick={() => handleClickProbar(e)}>Probar</button>
-                                </td>
-                            </tr>
-                        )
-                    }
-                </tbody>
-            </table>
-        </div>
-    </>)
+return (
+  <>
+    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
+        <thead className="text-xs uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" className="px-6 py-3">Nombre WhatsApp</th>
+            <th scope="col" className="px-6 py-3">Número WhatsApp</th>
+            <th scope="col" className="px-6 py-3">Identificador</th>
+            <th scope="col" className="px-6 py-3">Estado</th>
+            <th scope="col" className="px-6 py-3 text-center">Opciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {dispoitivos.map((e, i) => (
+            <tr
+              key={i}
+              className="bg-white border-b hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-600"
+            >
+              <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                {e.cNombreDispositivo}
+              </td>
+              <td className="px-6 py-4">{e.cNombreDispositivo}</td>
+              <td className="px-6 py-4">{e.nIdRef}</td>
+              <td className="px-6 py-4">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                  🟠 Procesando
+                </span>
+              </td>
+              <td className="px-6 py-4 text-center">
+                <div className="flex justify-center gap-2">
+                  <button
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1 rounded-md transition"
+                    onClick={() => handleClickReconectar(e)}
+                  >
+                    Reconectar
+                  </button>
+                  <button
+                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md transition"
+                    onClick={() => handleClickDesconectar(e)}
+                  >
+                    Desconectar
+                  </button>
+                  <button
+                    className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-md transition"
+                    onClick={() => handleClickProbar(e)}
+                  >
+                    Probar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+);
+
 }
 
 export default function Conexiones() {
@@ -369,22 +378,42 @@ export default function Conexiones() {
     const [data, setData] = useState({});
     const [qrReconectar, setQrReconectar] = useState(false);
 
-    return (
-        <>
-            <header className="bg-white shadow">
-                <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex items-center justify-between">
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Lista de Conexiones</h1>
-                    <button onClick={() => setOpen(true)} className="bg-blue-400 px-3 py-2 border rounded-lg text-white cursor-pointer text-sm font-bold">Nueva Conexion</button>
-                </div>
-            </header>
-            <main>
-                <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <ListadoConexiones openReconectar={openReconectar} setOpenReconectar={setOpenReconectar} setData={setData} />
-                </div>
-            </main>
+return (
+  <>
+    <header className="bg-white shadow-md">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex items-center justify-between">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+          Lista de Conexiones
+        </h1>
+        <button
+          onClick={() => setOpen(true)}
+          className="bg-blue-500 hover:bg-blue-600 transition-colors px-4 py-2 rounded-md text-white text-sm font-semibold shadow-sm"
+        >
+          + Nueva Conexión
+        </button>
+      </div>
+    </header>
 
-            <Modal open={open} setOpen={setOpen} />
-            <ModalReconectar open={openReconectar} setOpen={setOpenReconectar} data={data} qrReconectar={qrReconectar} setData={setData} setQrReconectar={setQrReconectar} />
-        </>
-    )
+    <main>
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <ListadoConexiones
+          openReconectar={openReconectar}
+          setOpenReconectar={setOpenReconectar}
+          setData={setData}
+        />
+      </div>
+    </main>
+
+    <Modal open={open} setOpen={setOpen} />
+    <ModalReconectar
+      open={openReconectar}
+      setOpen={setOpenReconectar}
+      data={data}
+      qrReconectar={qrReconectar}
+      setData={setData}
+      setQrReconectar={setQrReconectar}
+    />
+  </>
+);
+
 }

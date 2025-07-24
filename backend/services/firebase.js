@@ -15,7 +15,8 @@ import {
   where,
   onSnapshot,
   orderBy,
-  limit
+  limit,
+  deleteDoc
 } from "firebase/firestore";
 import dotenv from 'dotenv'
 import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS } from '../variables/ChatsTiempoReal.js';
@@ -178,9 +179,24 @@ export const SearchContentChat = async (collec, cCliente, cUsuario) => {
 
 // Funcion para extraer los ultimo 40 mensajes de un chat
 
-export const BuscaUltimosMensajes = async (collec, cCliente, cUsuario, limitCount = 70) => {
+export const BuscaUltimosMensajes = async (collec, cCliente, cUsuario, limitCount = 100) => {
 
   const searchRef = collection(db, collec);
+
+  // Eliminar chats del tu
+
+  const qeliminar = query(
+    searchRef,
+    where("from", "==", cUsuario),
+    where("to", "==", cUsuario)
+  );
+
+  const snapshot = await getDocs(qeliminar);
+
+  const deletions = snapshot.docs.map(doc => deleteDoc(doc.ref));
+
+  await Promise.all(deletions);
+
   const q = query(
     searchRef,
     where("from", "in", [cCliente, cUsuario]),
