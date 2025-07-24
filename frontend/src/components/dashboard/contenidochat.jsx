@@ -521,13 +521,26 @@ function RespuestasRapidas({ respuestarapida, setRespuestarapida, setMensajerrs 
 
     return (
         <>
-            {respuestarapida.length === 0 || open === false || rrs.length === 0 ? void 0 :
-                <div className="bg-white py-1 px-4 flex flex-col absolute bottom-[6.5vh] left-0 right-0 overflow-auto max-h-[25rem] rounded-md ml-[6.5rem] w-[84%] shadow-md">
-                    {rrs.map((i,index) => <p className="text-sm font-normal border-gray-300 border-b-[1px] py-4 cursor cursor-pointer" style={{ whiteSpace: 'pre-line' }} onClick={(e) => handleClicRR(e)} key={index} >{i}</p>)}
-                </div>}
-
+            {(respuestarapida.length === 0 || open === false || rrs.length === 0)
+                ? null
+                : (
+                    <div className="absolute bottom-[6.5vh] left-0 right-0 ml-[6.5rem] w-[84%] max-h-[25rem] overflow-auto bg-white shadow-lg rounded-md border border-gray-200">
+                        {rrs.map((i, index) => (
+                            <p
+                                key={index}
+                                className="text-sm text-gray-800 font-normal py-3 px-4 border-b border-gray-100 hover:bg-gray-100 cursor-pointer whitespace-pre-line"
+                                onClick={(e) => handleClicRR(e)}
+                            >
+                                {i}
+                            </p>
+                        ))}
+                    </div>
+                )
+            }
         </>
-    )
+    );
+
+
 }
 
 
@@ -612,35 +625,36 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
     // Grabar audio
 
     const handleGrabarAudio = (valor) => {
-    if (valor === '') {
-        alert('No se ha grabado ningún audio');
-        return;
-    }
+        if (valor === '') {
+            alert('No se ha grabado ningún audio');
+            return;
+        }
 
-    //console.log(valor);
-    const confirmarEnvio = window.confirm('¿Estás seguro de que quieres enviar este audio?');
-    if (!confirmarEnvio) return;
+        //console.log(valor);
+        const confirmarEnvio = window.confirm('¿Estás seguro de que quieres enviar este audio?');
+        if (!confirmarEnvio) return;
 
-    const body = {
-        message: {
-            mimetype: 'audio/webm',//'audio/ogg; codecs=opus',
-            data: valor,
-            filename: 'mensaje.webm'
-        },
-        cCliente: dataclic,
-        cUsuario: dataclicuser,
-        tipomensaje: 'audio'
-    };
+        const body = {
+            message: {
+                mimetype: 'audio/webm',//'audio/ogg; codecs=opus',
+                data: valor,
+                filename: 'mensaje.webm'
+            },
+            cCliente: dataclic,
+            cUsuario: dataclicuser,
+            tipomensaje: 'audio'
+        };
 
-    //console.log(body);
+        //console.log(body);
 
-    socket.emit('send-message-chat', body);
+        socket.emit('send-message-chat', body);
     };
 
 
     return (
-        <div className="bg-[#0F172A] py-4 px-4 flex items-center gap-2 rounded-b-md">
-            <div>
+        <div className="bg-[#0F172A] py-3 px-4 flex items-center gap-3 rounded-b-md shadow-inner">
+            {/* Ícono de Foto */}
+            <div className="flex items-center justify-center hover:bg-white/10 p-1 rounded transition">
                 <PhotoIcon className="h-6 w-6 cursor-pointer text-white" onClick={handleClick} />
                 <input
                     type="file"
@@ -649,90 +663,116 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
                     onChange={handleFileChange}
                 />
             </div>
-            <div>
+
+            {/* Ícono de PDF */}
+            <div className="flex items-center justify-center hover:bg-white/10 p-1 rounded transition">
                 <DocumentIcon
                     className="h-6 w-6 cursor-pointer text-white"
                     title="Cargar PDF"
                     onClick={handleIconClickPDF}
-
                 />
                 <input
                     type="file"
                     accept="application/pdf"
                     ref={fileInputRefPDF}
                     onChange={handleFileChangePDF}
-                    style={{ display: "none" }} // Oculta el input
+                    style={{ display: "none" }}
                 />
             </div>
-            <div>
-                <AudioRecorder onBase64 ={handleGrabarAudio} onMymetype={setHandleMymetype}/>
-            </div>            
-            <textarea className="rounded-md w-full text-xs px-2 py-1 whitespace-pre-wrap"
+
+            {/* Grabador de audio */}
+            <div className="flex items-center justify-center">
+                <AudioRecorder onBase64={handleGrabarAudio} onMymetype={setHandleMymetype} />
+            </div>
+
+            {/* Campo de texto */}
+            <textarea
+                className="rounded-md w-full text-xs px-3 py-2 resize-none bg-white/10 text-white placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-white"
                 type="text"
                 placeholder="Escribe un mensaje 💬"
-                onChange={(e) => { setMessage(e.target.value); handleRespuestaRapida(e.target.value) }}
+                onChange={(e) => {
+                    setMessage(e.target.value);
+                    handleRespuestaRapida(e.target.value);
+                }}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                        e.preventDefault(); // Previene el salto de línea
-                        handleSend(); // Envía el mensaje
+                        e.preventDefault();
+                        handleSend();
                     }
                 }}
-                value={message} />
-            <PaperAirplaneIcon className="h-5 w-5 cursor-pointer text-white" onClick={handleSend} />
+                value={message}
+            />
+
+            {/* Botón de enviar */}
+            <PaperAirplaneIcon
+                className="h-5 w-5 ml-2 cursor-pointer text-white hover:text-green-300 transition"
+                onClick={handleSend}
+            />
         </div>
+
     )
 }
 
 function MensajeEnviadoCliente({ infodatos }) {
-
     return (
-        <>
-            <div className="bg-[#DCF8C6] self-start py-3 px-3 rounded-r-md rounded-bl-md max-w-lg flex flex-col break-words">
-                {
-                    infodatos.type === 'chat' || infodatos.type === 'list_response'
-                        ? <p className="w-auto text-sm whitespace-pre-line">{infodatos.body.filename ? infodatos.body.filename : infodatos.body}</p>
-                        : infodatos.type === 'image'
-                            ? <p className="font-light text-sm"><img src={`data:image/jpeg;base64,${infodatos.datamedia}`} className="w-48 h-auto pb-3" />{infodatos.body == 'No definido' ? 'Descargar' : infodatos.body}</p>
-                            : infodatos.type.includes('ptt') || infodatos.type.includes('audio')
-                                ? <p className="font-light text-sm"><audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="h-10 pb-3" controls>{infodatos.body}</audio></p>
-                                : infodatos.type === 'sticker'
-                                    ? <p className="font-light text-sm"><img src={`data:image/webp;base64,${infodatos.datamedia}`} className="w-48 h-auto pb-3" />{infodatos.body}</p>
-                                    : infodatos.type === 'list'
-                                        ? <p className="font-light text-sm">{infodatos.body}</p>
-                                        : infodatos.type === 'document'
-                                            ? <p className="font-light text-sm"><a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-500" download={infodatos.body}>{infodatos.body}</a></p>
-                                            : <p className="font-light text-sm">Tipo Mensaje : {infodatos.body} - {infodatos.type}</p>
-                }
-                <p className="text-xs px-4 text-gray-400 py-1">{new Date(new Date(infodatos.time).setHours(new Date(infodatos.time).getHours() - 5)).toISOString()}</p>
-            </div>
-        </>
-    )
+        <div className="bg-green-100 self-start px-4 py-2 rounded-xl max-w-lg shadow text-sm text-gray-800 mb-1">
+            {
+                infodatos.type === 'chat' || infodatos.type === 'list_response' ? (
+                    <p className="whitespace-pre-line break-words break-all">{infodatos.body.filename || infodatos.body}</p>
+                ) : infodatos.type === 'image' ? (
+                    <>
+                        <img src={`data:image/jpeg;base64,${infodatos.datamedia}`} className="w-48 rounded mb-2" alt="Imagen enviada" />
+                        <p>{infodatos.body === 'No definido' ? 'Descargar' : infodatos.body}</p>
+                    </>
+                ) : infodatos.type.includes('ptt') || infodatos.type.includes('audio') ? (
+                    <audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="w-full mt-1" controls />
+                ) : infodatos.type === 'sticker' ? (
+                    <img src={`data:image/webp;base64,${infodatos.datamedia}`} className="w-32 h-auto" alt="Sticker" />
+                ) : infodatos.type === 'list' ? (
+                    <p>{infodatos.body}</p>
+                ) : infodatos.type === 'document' ? (
+                    <a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-600 underline" download={infodatos.body}>{infodatos.body}</a>
+                ) : (
+                    <p>Tipo Mensaje: {infodatos.body} - {infodatos.type}</p>
+                )
+            }
+            <p className="text-[10px] text-right text-gray-500 mt-1">
+                {new Date(infodatos.time).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+        </div>
+    );
 }
 
 function MensajeEnviadoUsuario({ infodatos }) {
-
-
     return (
-        <div className="bg-[#FFFFFF] self-end py-3 px-3 rounded-r-md rounded-bl-md max-w-lg flex flex-col break-words">
+        <div className="bg-white self-end px-4 py-2 rounded-xl max-w-lg shadow text-sm text-gray-800 border border-gray-200 mb-1">
             {
-                infodatos.type === 'chat' || infodatos.type === 'list_response'
-                    ? <p className="w-auto text-sm whitespace-pre-line">{infodatos.body.filename ? infodatos.body.filename : infodatos.body}</p>
-                    : infodatos.type === 'image'
-                        ? <p className="font-light text-sm"><img src={`data:image/jpeg;base64,${infodatos.datamedia}`} className="w-48 h-auto pb-3" />{infodatos.body == 'No definido' ? null : infodatos.body}</p>
-                        : infodatos.type.includes('ptt') || infodatos.type.includes('audio')
-                            ? <p className="font-light text-sm"><audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="h-10 pb-3" controls>{infodatos.body}</audio></p>
-                            : infodatos.type === 'sticker'
-                                ? <p className="font-light text-sm"><img src={`data:image/webp;base64,${infodatos.datamedia}`} className="w-48 h-auto pb-3" />{infodatos.body}</p>
-                                : infodatos.type === 'list'
-                                    ? <p className="font-light text-sm">{infodatos.body}</p>
-                                    : infodatos.type === 'document'
-                                        ? <p className="font-light text-sm"><a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-500" download={infodatos.body}>{infodatos.body}</a></p>
-                                        : <p className="font-light text-sm">Tipo Mensaje : {infodatos.body} - {infodatos.type}</p>
+                infodatos.type === 'chat' || infodatos.type === 'list_response' ? (
+                    <p className="whitespace-pre-line break-words break-all">{infodatos.body.filename || infodatos.body}</p>
+                ) : infodatos.type === 'image' ? (
+                    <>
+                        <img src={`data:image/jpeg;base64,${infodatos.datamedia}`} className="w-48 rounded mb-2" alt="Imagen enviada" />
+                        {infodatos.body !== 'No definido' && <p>{infodatos.body}</p>}
+                    </>
+                ) : infodatos.type.includes('ptt') || infodatos.type.includes('audio') ? (
+                    <audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="w-full mt-1" controls />
+                ) : infodatos.type === 'sticker' ? (
+                    <img src={`data:image/webp;base64,${infodatos.datamedia}`} className="w-32 h-auto" alt="Sticker" />
+                ) : infodatos.type === 'list' ? (
+                    <p>{infodatos.body}</p>
+                ) : infodatos.type === 'document' ? (
+                    <a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-600 underline" download={infodatos.body}>{infodatos.body}</a>
+                ) : (
+                    <p>Tipo Mensaje: {infodatos.body} - {infodatos.type}</p>
+                )
             }
-            <p className="text-xs px-4 text-gray-400 py-1">{new Date(new Date(infodatos.time).setHours(new Date(infodatos.time).getHours() - 5)).toISOString()}</p>
+            <p className="text-[10px] text-right text-gray-500 mt-1">
+                {new Date(infodatos.time).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+            </p>
         </div>
-    )
+    );
 }
+
 
 function DetalleChat({ dataclic, dataclicuser }) {
 
@@ -743,7 +783,7 @@ function DetalleChat({ dataclic, dataclicuser }) {
     const [respuestarapida, setRespuestarapida] = useState("");
     const [mensajerrs, setMensajerrs] = useState("");
     const [loading, setLoading] = useState(false);
-    const [scroll , setScroll] = useState(false);
+    const [scroll, setScroll] = useState(false);
 
     // Referencia para autoscroll
     const scrollRef = useRef(null);
@@ -833,7 +873,7 @@ function DetalleChat({ dataclic, dataclicuser }) {
             console.log('Nuevo mensaje filtrado:', esEntreUsuarios);
 
             // Usar las referencias para acceder a los valores más actuales 
-            
+
             //const filtrado = e.data.filter(item =>
             //    (item.from === dataclicRef.current && item.to === dataclicuserRef.current) ||
             //    (item.from === dataclicuserRef.current && item.to === dataclicRef.current)
@@ -869,39 +909,50 @@ function DetalleChat({ dataclic, dataclicuser }) {
     return (
         <div className="flex flex-col h-[90%] relative">
             {firtload === true ? null :
-                load === true ?
-                <div className="absolute top-1/2 left-1/2">
-                    <ImSpinner3 className="h-10 w-10 animate-spin" />
-                </div>
-                : null
+                load === true && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <ImSpinner3 className="h-10 w-10 animate-spin text-blue-600" />
+                    </div>
+                )
             }
-            <div ref={scrollRef} className="bg-blue-100 flex flex-col flex-grow overflow-y-auto max-h-full pb-5">
-                <div className="pt-4 px-4 flex flex-col gap-3" ref={scrollRef}>
-                    {
-                        loading === true ?
-                            <div className="bg-[#0F172A] py-3 px-3 rounded-r-md rounded-bl-md max-w-lg flex flex-col break-words">
-                                <p className="text-sm font-light text-white">Cargando...</p>
-                            </div>
-                            : null
-                    }
-                    {
-                        dataclic != '' ?
-                            datachatclienteuni.map((e,index) => {
-                                try {
-                                    return e.fromMe === false ? <MensajeEnviadoCliente key={index} infodatos={e} /> : <MensajeEnviadoUsuario key={index} infodatos={e}/>
-                                } catch (error) {
-                                    console.log(error)
-                                }
 
-                            })
-                            : null
-                    }
+            <div ref={scrollRef} className="bg-blue-100 flex flex-col flex-grow overflow-y-auto max-h-full pb-5">
+                <div className="pt-4 px-4 flex flex-col gap-3">
+                    {loading === true && (
+                        <div className="bg-[#0F172A] py-3 px-4 rounded-r-md rounded-bl-md max-w-lg self-start shadow-sm">
+                            <p className="text-sm font-light text-white">Cargando...</p>
+                        </div>
+                    )}
+
+                    {dataclic !== '' && datachatclienteuni.map((e, index) => {
+                        try {
+                            return e.fromMe === false
+                                ? <MensajeEnviadoCliente key={index} infodatos={e} />
+                                : <MensajeEnviadoUsuario key={index} infodatos={e} />
+                        } catch (error) {
+                            console.log(error);
+                            return null;
+                        }
+                    })}
                 </div>
             </div>
-            <RespuestasRapidas respuestarapida={respuestarapida} setRespuestarapida={setRespuestarapida} setMensajerrs={setMensajerrs} />
-            <BarradeMensaje dataclic={dataclic} dataclicuser={dataclicuser} respuestarapida={respuestarapida} setRespuestarapida={setRespuestarapida} mensajerrs={mensajerrs} />
+
+            <RespuestasRapidas
+                respuestarapida={respuestarapida}
+                setRespuestarapida={setRespuestarapida}
+                setMensajerrs={setMensajerrs}
+            />
+
+            <BarradeMensaje
+                dataclic={dataclic}
+                dataclicuser={dataclicuser}
+                respuestarapida={respuestarapida}
+                setRespuestarapida={setRespuestarapida}
+                mensajerrs={mensajerrs}
+            />
         </div>
     );
+
 }
 
 function Cabecerachat({ dataclic, dataclicuser }) {
@@ -918,42 +969,109 @@ function Cabecerachat({ dataclic, dataclicuser }) {
         setOpenModalConsulta(true)
     }
 
+    const handleCrearNuevoChat = async () => {
+        const numpromt = prompt('SOLO AGENCIA - Ingrese el número de WhatsApp del nuevo cliente (con código de país):');
+        if (numpromt) {
+            console.log('Nuevo número ingresado:', numpromt);
+
+            try {
+
+                const back = window.location.href.includes(conexiones.front1) ? conexiones.back1 : conexiones.back2;
+                const request = await fetch(`${back}send-message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(
+                        {
+                            "mensajes": [
+                                {
+                                    "mensaje": ".",
+                                    "tipomensaje": "texto"
+                                }
+                            ],
+                            "cCliente": numpromt + "@c.us",
+                            "cUsuario": "51986230303@c.us"
+                        }
+                    )
+                });
+
+                const response = await request.json();
+                console.log('Respuesta del servidor:', response);
+
+            } catch (error) {
+
+                console.error('Error al enviar el mensaje de prueba:', error);
+                alert("Error al enviar el mensaje de prueba, revisa la consola para mas detalles.");
+
+            }
+
+        } else {
+            console.log('No se ingresó ningún número.');
+        }
+    }
+
     const copiarTexto = () => {
-    const texto = '123456';  // Número a copiar
-    navigator.clipboard.writeText(texto)
-      .then(() => {
-        setCopiado(true);  // Cambiar estado para mostrar el mensaje de copiado
-        setTimeout(() => setCopiado(false), 2000); // Después de 2 segundos, quitar el mensaje
-      })
-      .catch(err => console.error('Error al copiar: ', err));
-  };
+        const texto = '123456';  // Número a copiar
+        navigator.clipboard.writeText(texto)
+            .then(() => {
+                setCopiado(true);  // Cambiar estado para mostrar el mensaje de copiado
+                setTimeout(() => setCopiado(false), 2000); // Después de 2 segundos, quitar el mensaje
+            })
+            .catch(err => console.error('Error al copiar: ', err));
+    };
 
     return (
-        <div className="bg-[#0F172A] px-4 py-4 rounded-t-md h-16 flex items-center">
-            <div className="bg-black rounded-full w-12 h-12"></div>
+        <div className="bg-[#0F172A] px-4 py-4 rounded-t-md h-16 flex items-center shadow-md">
+            {/* Contenido principal */}
             <div className="flex flex-row justify-between items-center ml-5 w-full">
-                <div className="flex flex-row gap-3 justify-center items-center">
-                <p className="font-bold text-sm text-white">🔴 {dataclic} || 🟢 WSP {dataclicuser} </p>
-                <div className="relative w-10 h-10 bg-blue-100/50 rounded-full items-center inline-flex justify-center">
-                    <ClipboardDocumentListIcon className="text-white w-6 h-6 cursor-pointer absolute"
-                    onClick={copiarTexto}/>
+
+                {/* Texto y botón de copiar */}
+                <div className="flex flex-row gap-3 items-center">
+                    <div className="bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+                        🔴 {dataclic.replace("@c.us", "")}
+                    </div>
+                    <span className="text-white font-bold text-sm">⬅️</span>
+                    <div className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+                        🟢 WSP {dataclicuser.replace("@c.us", "")}
+                    </div>
+                    <div className="relative w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
+                        <ClipboardDocumentListIcon
+                            className="text-white w-5 h-5 cursor-pointer"
+                            onClick={copiarTexto}
+                        />
+                    </div>
                 </div>
-                </div>
-                <div>
+
+
+                {/* Botones de acciones */}
+                <div className="flex items-center gap-2">
                     <input
                         type="button"
-                        className="bg-[#ffd140] px-4 py-2 rounded-md shadow-xl text-black font-bold text-sm m-4 cursor-pointer"
+                        className="bg-[#ffd140] hover:bg-yellow-400 px-4 py-2 rounded-md shadow font-bold text-xs text-black transition cursor-pointer"
+                        value="G. PayPal"
                         onClick={() => handleOpenModal()}
-                        value="Generar Link PayPal" />
-                    <input type="button"
-                        className="bg-red-600 px-4 py-2 rounded-md shadow-xl border-2 border-red-600  text-white font-bold text-sm m-4 cursor-pointer"
-                        value="Consultar Link PayPal"
-                        onClick={() => handleOpenModalConsulta()} />
+                    />
+                    <input
+                        type="button"
+                        className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-md shadow border-2 border-red-600 text-white font-bold text-xs transition cursor-pointer"
+                        value="C. PayPal"
+                        onClick={() => handleOpenModalConsulta()}
+                    />
+                    <input
+                        type="button"
+                        className="bg-lime-400 hover:bg-lime-300 px-4 py-2 rounded-md shadow border-2 border-lime-600 font-bold text-xs transition cursor-pointer"
+                        value="C. Nuevo Chat"
+                        onClick={() => handleCrearNuevoChat()}
+                    />
                 </div>
             </div>
+
+            {/* Modales */}
             <ModalEnlacePayPal openModal={openModal} setOpenModal={setOpenModal} />
             <ModalConsultarPayPal openModalConsulta={openModalConsulta} setOpenModalConsulta={setOpenModalConsulta} />
         </div>
+
     )
 }
 

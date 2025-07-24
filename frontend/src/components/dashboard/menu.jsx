@@ -13,7 +13,7 @@ import { conexiones } from './variables/env';
 // si la url tiene la ip http://100.80.67.12:3000 se conecta a la ip publica
 
 if (window.location.href.includes(conexiones.front1)) {
-    var socket = io(conexiones.back1, { 
+    var socket = io(conexiones.back1, {
         withCredentials: true
     });
 } else {
@@ -25,7 +25,7 @@ if (window.location.href.includes(conexiones.front1)) {
 
 const navigation = [
     { name: 'Inicio', current: true },
-    { name: 'Conexiones', current: false}//,
+    { name: 'Conexiones', current: false }//,
     //{ name: 'Respuestas Rapidas', current: false },
     //{ name: 'Integraciones', current: false },
 ]
@@ -42,25 +42,25 @@ function classNames(...classes) {
 export default function Example() {
 
     const [conectados, setConectados] = useState(false);
-  const [socket, setSocket] = useState(null);
+    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
         const urlActual = window.location.href;
         const socketURL = urlActual.includes(conexiones.front1)
-        ? conexiones.back1
-        : conexiones.back2;
+            ? conexiones.back1
+            : conexiones.back2;
 
         const newSocket = io(socketURL, {
-        withCredentials: true,
+            withCredentials: true,
         });
 
         // Eventos
         newSocket.on('connect', () => {
-        setConectados(true);
+            setConectados(true);
         });
 
         newSocket.on('connect_error', () => {
-        setConectados(false);
+            setConectados(false);
         });
 
         // Guardar socket en el estado si lo necesitas en otras partes
@@ -68,7 +68,7 @@ export default function Example() {
 
         // Limpieza al desmontar
         return () => {
-        newSocket.disconnect();
+            newSocket.disconnect();
         };
     }, []);
 
@@ -82,23 +82,15 @@ export default function Example() {
             'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png',
     };
 
-    useEffect(()=>{
-        switch(opcion){
+    useEffect(() => {
+        switch (opcion) {
             case 'Inicio': setControladormenu(<Inicio />); break;
             case 'Conexiones': setControladormenu(<Conexiones />); break;
         }
-    },[opcion])
+    }, [opcion])
 
     return (
         <>
-            {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-100">
-        <body class="h-full">
-        ```
-      */}
             <div className="min-h-full">
                 <Disclosure as="nav" className="bg-[#1E1E2F]">
                     <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
@@ -107,13 +99,13 @@ export default function Example() {
                                 <div className="shrink-0 flex flex-row items-end space-x-2">
                                     <div className="relative h-10 w-auto">
                                         <img
-                                        alt="Your Company"
-                                        src="logom.png"
-                                        className="h-10 w-auto"
+                                            alt="Your Company"
+                                            src="logom.png"
+                                            className="h-10 w-auto"
                                         />
                                     </div>
                                     <p className="text-white text-sm self-end">v {pkg.version}</p>
-                                    </div>
+                                </div>
                                 <div className="hidden md:block">
                                     <div className="ml-4 flex items-baseline space-x-4">
                                         {navigation.map((item) => (
@@ -232,29 +224,38 @@ export default function Example() {
                         </div>
                     </DisclosurePanel>
                 </Disclosure>
-                <div className={`${conectados ? 'bg-green-600' : 'bg-red-500'} h-9 flex flex-row items-center justify-center`}>
-                <p className='text-center text-xs text-white font-bold'>
-                    {
-                    conectados
-                        ? '✅ Estás conectado y tienes los permisos de acceso necesarios'
-                        : (
-                        window.location.href.includes(conexiones.front1)
-                            ? (
+                <div className={`${conectados ? 'bg-green-600' : 'bg-red-500'} h-9 flex items-center justify-center px-4`}>
+                    <p className="text-white text-xs sm:text-sm font-semibold text-center">
+                        {conectados ? (
+                            '✅ Estás conectado y tienes los permisos de acceso necesarios'
+                        ) : window.location.href.includes(conexiones.front1) ? (
                             <>
-                                Estas presencial, pero te faltan los permisos de acceso ➡️{' '}
-                                <a href={conexiones.back1} target='_blank' className="underline text-blue-200">Dar Permisos</a>
+                                Estás presencial, pero te faltan los permisos de acceso ➡️{' '}
+                                <a
+                                    href={conexiones.back1}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline text-blue-100 hover:text-blue-200 transition-colors"
+                                >
+                                    Dar Permisos
+                                </a>
                             </>
-                            )
-                            : (
+                        ) : (
                             <>
-                                Estas en remoto, pero te faltan los permisos de acceso ➡️{' '}
-                                <a href={conexiones.back2} target='_blank' className="underline text-blue-200">Dar Permisos</a>
+                                Estás en remoto, pero te faltan los permisos de acceso ➡️{' '}
+                                <a
+                                    href={conexiones.back2}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline text-blue-100 hover:text-blue-200 transition-colors"
+                                >
+                                    Dar Permisos
+                                </a>
                             </>
-                            )
-                        )
-                    }
-                </p>
+                        )}
+                    </p>
                 </div>
+
                 {controladormenu}
             </div>
         </>

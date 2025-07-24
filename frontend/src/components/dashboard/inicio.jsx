@@ -11,9 +11,9 @@ export default function Inicio() {
 
     return (
         <>
-            <header className="bg-white shadow">
-                <div className="mx-auto max-w-full py-4 sm:px-6">
-                    <h1 className="text-xl text-gray-600 font-semibold tracking-tight">Chats</h1>
+            <header className="bg-white shadow-md">
+                <div className="max-w-full py-4 px-8 sm:px-10">
+                    <h1 className="text-2xl font-bold text-gray-800 tracking-tight">📨 Chats</h1>
                 </div>
             </header>
             <main className=" h-[80vh] my-[-2vh]">

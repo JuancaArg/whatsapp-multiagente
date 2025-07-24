@@ -63,15 +63,28 @@ function Elementos({search, setSearch , inputSearch ,setDataclic ,setDataclicuse
     }
 
     const listelemnt = arrayda.map((e,i)=>
-        <div className="px-3 py-3 flex gap-4 cursor-pointer" key={i} 
-        onClick={()=> handleClicElem(e.cCliente,e.cUsuario)}>
-            <div>
-                <div className="bg-black w-14 h-14 rounded-full"></div>
-            </div>
-            <div className="flex flex-col justify-center">
-                <p className="font-light text-sm"> {e.cCliente} || Wsp : {e.cUsuario} </p>
-                <p className="font-extralight text-xs pt-2">Ultimo Chat registrado..Ultimo Chat registrado..</p>
-            </div>
+        <div
+        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer"
+        key={i}
+        onClick={() => handleClicElem(e.cCliente, e.cUsuario)}
+        >
+        {/* Avatar */}
+        <div className="w-14 h-14 rounded-full overflow-hidden border border-gray-300 shadow-sm">
+            <img src="profilewsp.webp" className="w-full h-full object-cover" alt="Perfil" />
+        </div>
+
+        {/* Info */}
+        <div className="flex flex-col justify-center gap-1">
+            <p className="text-sm font-semibold text-gray-800">
+            ➡️ {e.cCliente.replace("@c.us", "")}
+            </p>
+            <p className="text-sm font-medium bg-orange-100 text-orange-800 px-3 py-1 rounded-md whitespace-nowrap border border-orange-300 shadow-sm">
+            {e.cUsuario
+                .replace("@c.us", "")
+                .replace(/\s+/g, "")
+                .replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3 $4")}
+            </p>
+        </div>
         </div>
     )
 
