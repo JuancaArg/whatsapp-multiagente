@@ -118,7 +118,7 @@ export default function ListadoChat({setDataclic,setDataclicuser}) {
     
 
     return (
-        <div className="w-1/3 py-4 flex flex-col h-full relative" >
+        <div className="w-[20%] py-4 flex flex-col h-full relative" >
             <div className="bg-[#0F172A] rounded-t-md flex items-center px-4 py-4 h-16">
                 <MagnifyingGlassCircleIcon className="text-white w-9 h-9 mr-2" />
                 <input type="search" className="py-1 px-2 w-full rounded-sm text-sm" onChange={(e)=> onHandleChange(e)} 
@@ -128,7 +128,7 @@ export default function ListadoChat({setDataclic,setDataclicuser}) {
                     }
                 }} 
                 value={inputSearch}
-                placeholder="Buscar un telefono o chat por palabra 😄" />
+                placeholder="Buscar un telefono 😄" />
             </div>
             <div className="bg-blue-100 h-full rounded-b-md overflow-y-auto border-[#CED4DA] border">
                 <Elementos search={search}  setSearch = {setSearch} inputSearch = {inputSearch} setInputSearch = {setInputSearch} setDataclic ={setDataclic} setDataclicuser={setDataclicuser}/>
