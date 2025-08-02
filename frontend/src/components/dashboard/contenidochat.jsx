@@ -521,22 +521,19 @@ function RespuestasRapidas({ respuestarapida, setRespuestarapida, setMensajerrs 
 
     return (
         <>
-            {(respuestarapida.length === 0 || open === false || rrs.length === 0)
-                ? null
-                : (
-                    <div className="absolute bottom-[6.5vh] left-0 right-0 ml-[6.5rem] w-[84%] max-h-[25rem] overflow-auto bg-white shadow-lg rounded-md border border-gray-200">
-                        {rrs.map((i, index) => (
-                            <p
-                                key={index}
-                                className="text-sm text-gray-800 font-normal py-3 px-4 border-b border-gray-100 hover:bg-gray-100 cursor-pointer whitespace-pre-line"
-                                onClick={(e) => handleClicRR(e)}
-                            >
-                                {i}
-                            </p>
-                        ))}
-                    </div>
-                )
-            }
+            {respuestarapida.length > 0 && open && rrs.length > 0 && (
+                <div className="absolute bottom-[64px] left-4 right-4 max-h-[25rem] overflow-auto bg-white shadow-lg rounded-md border border-gray-200 z-10">
+                    {rrs.map((i, index) => (
+                        <p
+                            key={index}
+                            className="text-sm text-gray-800 font-normal py-3 px-4 border-b border-gray-100 hover:bg-gray-100 cursor-pointer whitespace-pre-line"
+                            onClick={(e) => handleClicRR(e)}
+                        >
+                            {i}
+                        </p>
+                    ))}
+                </div>
+            )}
         </>
     );
 
@@ -725,7 +722,7 @@ function MensajeEnviadoCliente({ infodatos }) {
                         <p>{infodatos.body === 'No definido' ? 'Descargar' : infodatos.body}</p>
                     </>
                 ) : infodatos.type.includes('ptt') || infodatos.type.includes('audio') ? (
-                    <audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="w-full mt-1" controls />
+                    <audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="mt-1" controls />
                 ) : infodatos.type === 'sticker' ? (
                     <img src={`data:image/webp;base64,${infodatos.datamedia}`} className="w-32 h-auto" alt="Sticker" />
                 ) : infodatos.type === 'list' ? (
@@ -737,7 +734,15 @@ function MensajeEnviadoCliente({ infodatos }) {
                 )
             }
             <p className="text-[10px] text-right text-gray-500 mt-1">
-                {new Date(infodatos.time).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                {new Date(infodatos.time).toLocaleDateString('es-PE', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })}{' '}
+                {new Date(infodatos.time).toLocaleTimeString('es-PE', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
             </p>
         </div>
     );
@@ -755,7 +760,7 @@ function MensajeEnviadoUsuario({ infodatos }) {
                         {infodatos.body !== 'No definido' && <p>{infodatos.body}</p>}
                     </>
                 ) : infodatos.type.includes('ptt') || infodatos.type.includes('audio') ? (
-                    <audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="w-full mt-1" controls />
+                    <audio src={`data:audio/ogg;base64,${infodatos.datamedia}`} className="mt-1" controls />
                 ) : infodatos.type === 'sticker' ? (
                     <img src={`data:image/webp;base64,${infodatos.datamedia}`} className="w-32 h-auto" alt="Sticker" />
                 ) : infodatos.type === 'list' ? (
@@ -767,7 +772,15 @@ function MensajeEnviadoUsuario({ infodatos }) {
                 )
             }
             <p className="text-[10px] text-right text-gray-500 mt-1">
-                {new Date(infodatos.time).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                {new Date(infodatos.time).toLocaleDateString('es-PE', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })}{' '}
+                {new Date(infodatos.time).toLocaleTimeString('es-PE', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
             </p>
         </div>
     );
@@ -937,19 +950,21 @@ function DetalleChat({ dataclic, dataclicuser }) {
                 </div>
             </div>
 
-            <RespuestasRapidas
-                respuestarapida={respuestarapida}
-                setRespuestarapida={setRespuestarapida}
-                setMensajerrs={setMensajerrs}
-            />
+            <div className="relative w-full">
+                <RespuestasRapidas
+                    respuestarapida={respuestarapida}
+                    setRespuestarapida={setRespuestarapida}
+                    setMensajerrs={setMensajerrs}
+                />
+                <BarradeMensaje
+                    dataclic={dataclic}
+                    dataclicuser={dataclicuser}
+                    respuestarapida={respuestarapida}
+                    setRespuestarapida={setRespuestarapida}
+                    mensajerrs={mensajerrs}
+                />
+            </div>
 
-            <BarradeMensaje
-                dataclic={dataclic}
-                dataclicuser={dataclicuser}
-                respuestarapida={respuestarapida}
-                setRespuestarapida={setRespuestarapida}
-                mensajerrs={mensajerrs}
-            />
         </div>
     );
 
@@ -957,9 +972,33 @@ function DetalleChat({ dataclic, dataclicuser }) {
 
 function Cabecerachat({ dataclic, dataclicuser }) {
 
+    /* Hooks de Dropdown */
+
+    const [openDrop, setOpenDrop] = useState(false);
+    const dropdownRef = useRef(null);
+
     const [openModal, setOpenModal] = useState(false);
     const [openModalConsulta, setOpenModalConsulta] = useState(false);
     const [copiado, setCopiado] = useState(false);
+
+    /* Logica de DropDown */
+
+    const handleToggle = () => {
+        setOpenDrop(!openDrop);
+    };
+
+    const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setOpenDrop(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleOpenModal = () => {
         setOpenModal(true)
@@ -991,7 +1030,7 @@ function Cabecerachat({ dataclic, dataclicuser }) {
                                 }
                             ],
                             "cCliente": numpromt + "@c.us",
-                            "cUsuario": "51986230303@c.us"
+                            "cUsuario": "51967439174@c.us"
                         }
                     )
                 });
@@ -1045,26 +1084,40 @@ function Cabecerachat({ dataclic, dataclicuser }) {
 
 
                 {/* Botones de acciones */}
-                <div className="flex items-center gap-2">
-                    <input
-                        type="button"
-                        className="bg-[#ffd140] hover:bg-yellow-400 px-4 py-2 rounded-md shadow font-bold text-xs text-black transition cursor-pointer"
-                        value="G. PayPal"
-                        onClick={() => handleOpenModal()}
-                    />
-                    <input
-                        type="button"
-                        className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-md shadow border-2 border-red-600 text-white font-bold text-xs transition cursor-pointer"
-                        value="C. PayPal"
-                        onClick={() => handleOpenModalConsulta()}
-                    />
-                    <input
-                        type="button"
-                        className="bg-lime-400 hover:bg-lime-300 px-4 py-2 rounded-md shadow border-2 border-lime-600 font-bold text-xs transition cursor-pointer"
-                        value="C. Nuevo Chat"
-                        onClick={() => handleCrearNuevoChat()}
-                    />
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        onClick={handleToggle}
+                        className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-md shadow text-white font-bold text-xs transition"
+                    >
+                        Acciones
+                    </button>
+                    {openDrop && (
+                        <div
+                            className="absolute top-full right-0 mt-2 flex flex-col divide-ys shadow-lg rounded-md  p-0 overflow-hidden z-10"
+                        >
+                            <input
+                                type="button"
+                                className="bg-[#FFD140] hover:bg-yellow-400 px-4 py-2 shadow font-bold text-xs text-black transition cursor-pointer"
+                                value="G. PayPal"
+                                onClick={() => handleOpenModal()}
+                            />
+                            <input
+                                type="button"
+                                className="bg-red-600 hover:bg-red-500 px-4 py-2  shadow border-2 border-red-600 text-white font-bold text-xs transition cursor-pointer"
+                                value="C. PayPal"
+                                onClick={() => handleOpenModalConsulta()}
+                            />
+                            <input
+                                type="button"
+                                className="bg-lime-400 hover:bg-lime-300 px-4 py-2  shadow border-2 border-lime-400 font-bold text-xs transition cursor-pointer"
+                                value="C. Nuevo Chat"
+                                onClick={() => handleCrearNuevoChat()}
+                            />
+                        </div>
+                    )}
                 </div>
+
+
             </div>
 
             {/* Modales */}
