@@ -224,10 +224,10 @@ export default function Example() {
                         </div>
                     </DisclosurePanel>
                 </Disclosure>
-                <div className={`${conectados ? 'bg-yellow-600' : 'bg-red-500'} h-9 flex items-center justify-center px-4`}>
+                <div className={`${conectados ? 'bg-green-600' : 'bg-red-500'} h-9 flex items-center justify-center px-4`}>
                     <p className="text-white text-xs sm:text-sm font-semibold text-center">
                         {conectados ? (
-                            '✅ Estás conectado y tienes los permisos de acceso necesarios | Linea 576 Bloqueada ( No enviar mensajes de ese número ) '
+                            '✅ Estás conectado y tienes los permisos de acceso necesarios | Sin lineas bloqueadas ✨✨ '
                         ) : window.location.href.includes(conexiones.front1) ? (
                             <>
                                 Estás presencial, pero te faltan los permisos de acceso ➡️{' '}

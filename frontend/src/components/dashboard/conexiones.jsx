@@ -316,7 +316,7 @@ return (
       <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
         <thead className="text-xs uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
           <tr>
-            <th scope="col" className="px-6 py-3">Nombre WhatsApp</th>
+            <th scope="col" className="px-6 py-3">Categoria</th>
             <th scope="col" className="px-6 py-3">Número WhatsApp</th>
             <th scope="col" className="px-6 py-3">Identificador</th>
             <th scope="col" className="px-6 py-3">Estado</th>
@@ -330,7 +330,7 @@ return (
               className="bg-white border-b hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-600"
             >
               <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                {e.cNombreDispositivo}
+                {e.cCategoriaDisposito}
               </td>
               <td className="px-6 py-4">{e.cNombreDispositivo}</td>
               <td className="px-6 py-4">{e.nIdRef}</td>
