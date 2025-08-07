@@ -184,10 +184,11 @@ io.on('connection', (socket) => {
 
     // Desconectar el cliente
     clientData.client.destroy().then(() => {
-        console.log('Cliente desconectado correctamente');
-        return clientData.client.initialize({ timeout: 0 });
-    }).then(() => {
-        console.log('Cliente reconectado correctamente');
+        console.warn('Cliente desconectado correctamente');
+        clientsMap.delete(clientData.nIdRef);
+        Sesion_Eliminar(clientData.nIdRef);
+        console.warn('Se eliminó la sesión de Firebase:', clientData.nIdRef);
+
     }).catch(err => {
         console.error('Error en el proceso de reinicio del cliente:', err);
     });

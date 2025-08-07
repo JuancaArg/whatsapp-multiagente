@@ -3,7 +3,8 @@ import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth, MessageMedia } = pkg;
 import { addUser, updateUser, ListDevices, addReg, InsertaContacto } from './firebase.js';
 import dotenv from 'dotenv'
-import { clientsMap } from '../variables/ChatsTiempoReal.js'; // Importar el mapa de clientes
+import dayjs from 'dayjs';
+import { clientsMap,clientesFirebase } from '../variables/ChatsTiempoReal.js'; // Importar el mapa de clientes
 
 // Cargar variables de entorno
 dotenv.config();
@@ -11,6 +12,27 @@ dotenv.config();
 import fs from 'fs';
 import path from 'path';
 import { time } from 'console';
+
+// Funcion para enviar a webhoook
+
+function sendWebhookNotification(data) {
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = data;
+
+    var requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: raw,
+    redirect: 'follow'
+    };
+
+    fetch("http://192.168.100.100:5678/webhook/4a969261-b7d9-42a8-9f5c-47ab967a666c", requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
+    .catch(error => console.log('error', error));
+}
 
 // Alimenta Objeto Clientes 
 
@@ -46,16 +68,15 @@ export async function ObtieneWspConectados(io) {
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
-                        '--disable-infobars',
-                        '--window-position=0,0',
-                        '--ignore-certifcate-errors',
-                        '--ignore-certifcate-errors-spki-list',
-                        '--disable-web-security',
-                        '--disable-site-isolation-trials',
+                        '--disable-dev-shm-usage',
+                        '--disable-accelerated-2d-canvas',
+                        '--disable-gpu',
                         '--no-first-run',
                         '--no-zygote',
                         '--single-process',
-                        '--disable-gpu'
+                        '--disable-infobars',
+                        '--disable-web-security',
+                        '--disable-features=IsolateOrigins,site-per-process',
                     ],
                     timeout: 0 
                 }
@@ -69,7 +90,7 @@ export async function ObtieneWspConectados(io) {
                 cl.on('qr', (qr) => {
                     // Guarda QR en el mapa de clientes
                     clientsMap.get(element.nIdRef).QR = qr;
-                    console.log(`QR para ${element.cNombreDispositivo}:`, qr);
+                    //console.log(`QR para ${element.cNombreDispositivo}:`, qr);
                 });
             
                 cl.on('authenticated', () => {
@@ -100,9 +121,15 @@ export async function ObtieneWspConectados(io) {
 
                 });
 
+                cl.on('error', (error) => {
+                    console.warn(`Error en el cliente ${element.cNombreDispositivo}:`, error);
+                });
 
                 cl.on('message_create', async (message) => {
                     try {
+
+                        console.warn('Mensaje detectado por whatsappService.js:', dayjs().format() , message.body);
+
                         const isFromMe = message.fromMe === false;
                         await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
 
@@ -129,13 +156,8 @@ export async function ObtieneWspConectados(io) {
                         }
                     
                         await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
-
-
                         // Logica para mandar mensaje a Microservicio de Google 
-
-                        /************ */
-
-                        
+                        /************ */   
                         try {
 
                             //console.log(data.body, data.to);
@@ -158,6 +180,8 @@ export async function ObtieneWspConectados(io) {
 
                             fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
                                 .catch(error => console.log('error', error));
+                            
+                            sendWebhookNotification(raw);
 
                         } catch (error) {
                             console.error('Error con el microservicio', error);
@@ -207,6 +231,7 @@ export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
         }
 
             if ( tipomensaje === 'texto' ) {
+                //console.warn('Mensaje enviado desde frontend',dayjs().format(), mensaje);                
                 await cl.sendMessage(cliente, mensaje);
             } else if (tipomensaje === 'imagen' || tipomensaje === 'pdf' || tipomensaje === 'audio') {
                 const body = new MessageMedia( mensaje.mimetype,  mensaje.data, mensaje.filename);
@@ -235,6 +260,7 @@ export async function createClient(DeviceName, io) {
         cDataJson: "",
         nIdRef: "",
         nPhoneNumber: DeviceName+"@c.us",
+        cCategoriaDisposito: ""
     }
 
     const idFireBase = await addUser(DataReg);
@@ -247,19 +273,18 @@ export async function createClient(DeviceName, io) {
         puppeteer: {
                     // Ejecutar en modo headless (sin interfaz gráfica)
                     headless: true,
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-infobars',
-                        '--window-position=0,0',
-                        '--ignore-certifcate-errors',
-                        '--ignore-certifcate-errors-spki-list',
-                        '--disable-web-security',
-                        '--disable-site-isolation-trials',
-                        '--no-first-run',
-                        '--no-zygote',
-                        '--single-process',
-                        '--disable-gpu'
+                    args : [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--disable-gpu',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-infobars',
+                    '--disable-web-security',
+                    '--disable-features=IsolateOrigins,site-per-process',
                     ],
                     timeout: 0 
         }
@@ -271,7 +296,7 @@ export async function createClient(DeviceName, io) {
 
     client.on('qr', (qr) => {
         console.log(`QR for session ${DeviceName} received`); 
-        console.log(qr);
+        //console.log(qr);
         // Guarda QR en el mapa de clientes
         clientsMap.get(idFireBase).QR = qr;
         // Aquí, estamos enviando el QR como una cadena base64 para renderizar en el frontend
@@ -347,6 +372,8 @@ export async function createClient(DeviceName, io) {
 
                             fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
                                 .catch(error => console.log('error', error));
+
+                            sendWebhookNotification(raw);
 
                         } catch (error) {
                             console.error('Error con el microservicio', error);

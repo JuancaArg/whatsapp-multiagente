@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import dotenv from 'dotenv'
 import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS } from '../variables/ChatsTiempoReal.js';
+import { clientesFirebase } from '../variables/ChatsTiempoReal.js'; // Importar el mapa de clientes
 
 // Cargar variables de entorno
 dotenv.config();
@@ -63,8 +64,7 @@ export const updateUser = async (collection, id) => {
   try {
     const docRef = doc(db, collection, id);
     await updateDoc(docRef, {
-      nIdRef: id,
-      cDataJson: ""
+      nIdRef: id
     });
     //console.log("se actualizo registro");
   } catch (error) {
@@ -137,7 +137,19 @@ export const SearchCollecion = async (collec, search) => {
     data.push(doc.data());
     //console.log(doc.id, " => ", doc.data());
   });
-  return data;
+
+  const clients = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
+
+  const newdata = data.map(i =>{
+    const match = clients.find(d => d.cNombreDispositivo === i.cUsuario);
+    const cCategoriaDisposito = match ? match.cCategoriaDisposito : "No Definido";
+    return {
+      ...i,
+      cCategoriaDisposito: cCategoriaDisposito
+    };
+  })
+
+  return newdata;
 }
 
 // Busqueda de Conetnido de Chat en firebase
@@ -399,7 +411,7 @@ export const OpenSuscripcion_ChatAbierto = async (io, body_peticion, key , socke
     const unsubscribe = onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
-          console.log("Nuevo mensaje:", change.doc.data());
+          //console.log("Nuevo mensaje:", change.doc.data());
           io.to(socketid).emit('list-clients-content-chat-added',{data : change.doc.data()});
         }
       });
@@ -417,4 +429,14 @@ export const ClosedSuscripcion_ChatAbierto = (io, body_peticion) => {
 
   null;
 
+}
+
+export const Sesion_Eliminar = async ( coleccion , id ) => {
+  try {
+    const docRef = doc(db, process.env.FIREBASE_COLECCION_SESIONES, id);
+    await deleteDoc(docRef);
+    //console.log("Documento eliminado con ID:", id);
+  } catch (error) {
+    console.error("Error al eliminar el documento:", error);
+  }
 }
