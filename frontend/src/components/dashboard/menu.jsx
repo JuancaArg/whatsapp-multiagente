@@ -227,7 +227,7 @@ export default function Example() {
                 <div className={`${conectados ? 'bg-green-600' : 'bg-red-500'} h-9 flex items-center justify-center px-4`}>
                     <p className="text-white text-xs sm:text-sm font-semibold text-center">
                         {conectados ? (
-                            '✅ Estás conectado y tienes los permisos de acceso necesarios | Sin lineas bloqueadas ✨✨ '
+                            '✅ Estás conectado y tienes los permisos de acceso necesarios'
                         ) : window.location.href.includes(conexiones.front1) ? (
                             <>
                                 Estás presencial, pero te faltan los permisos de acceso ➡️{' '}

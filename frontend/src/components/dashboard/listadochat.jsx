@@ -1,7 +1,7 @@
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
 import { use, useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { conexiones } from './variables/env';
+import { conexiones,LineasBloqueadas } from './variables/env';
 
 if (window.location.href.includes(conexiones.front1)) {
     var socket = io(conexiones.back1, {
@@ -80,9 +80,23 @@ const listelemnt = arrayda.map((e, i) => (
       </p>
     </div>
 <div className="relative">
-  <span className="absolute top-[-14px] right-0 text-xs font-semibold bg-green-600 text-white px-3 py-1 rounded-bl-lg shadow">
-    {e.cCategoriaDisposito || 'Sin categoría'}
-  </span>
+    <span
+    className={`absolute top-[-14px] right-0 text-xs font-semibold px-3 py-1 rounded-bl-lg shadow 
+        ${
+        (e.cCategoriaDisposito === "No Definido" &&
+            LineasBloqueadas.some(i => e.cUsuario?.includes(i)))
+            ? "bg-red-600"
+            : "bg-green-600"
+        } text-white`}
+    >
+    {
+        e.cCategoriaDisposito === "No Definido"
+        ? LineasBloqueadas.some(i => e.cUsuario?.includes(i))
+            ? "Bloqueado"
+            : "No definido"
+        : e.cCategoriaDisposito
+    }
+    </span>
 </div>
 
   </div>
