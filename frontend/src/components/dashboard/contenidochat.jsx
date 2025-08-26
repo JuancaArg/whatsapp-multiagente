@@ -1030,7 +1030,7 @@ function Cabecerachat({ dataclic, dataclicuser }) {
                                 }
                             ],
                             "cCliente": numpromt + "@c.us",
-                            "cUsuario": "51915197767@c.us"
+                            "cUsuario": "51942270140@c.us"
                         }
                     )
                 });

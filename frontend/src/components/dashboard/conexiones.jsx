@@ -353,12 +353,15 @@ return (
                   >
                     Desconectar
                   </button>
+                  
                   <button
                     className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-md transition"
                     onClick={() => handleClickProbar(e)}
+                    
                   >
                     Probar
                   </button>
+                  
                 </div>
               </td>
             </tr>

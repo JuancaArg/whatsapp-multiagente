@@ -1,17 +1,32 @@
 //const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 import pkg from 'whatsapp-web.js';
-const { Client, LocalAuth, MessageMedia } = pkg;
-import { addUser, updateUser, ListDevices, addReg, InsertaContacto } from './firebase.js';
+const {
+    Client,
+    LocalAuth,
+    MessageMedia
+} = pkg;
+import {
+    addUser,
+    updateUser,
+    ListDevices,
+    addReg,
+    InsertaContacto
+} from './firebase.js';
 import dotenv from 'dotenv'
 import dayjs from 'dayjs';
-import { clientsMap,clientesFirebase } from '../variables/ChatsTiempoReal.js'; // Importar el mapa de clientes
+import {
+    clientsMap,
+    clientesFirebase
+} from '../variables/ChatsTiempoReal.js'; // Importar el mapa de clientes
 
 // Cargar variables de entorno
 dotenv.config();
 
 import fs from 'fs';
 import path from 'path';
-import { time } from 'console';
+import {
+    time
+} from 'console';
 
 // Funcion para enviar a webhoook
 
@@ -22,16 +37,14 @@ function sendWebhookNotification(data) {
     var raw = data;
 
     var requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow'
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
     };
 
     fetch("http://192.168.100.100:5678/webhook/4a969261-b7d9-42a8-9f5c-47ab967a666c", requestOptions)
-    .then(response => response.text())
-    .then(result => console.log(result))
-    .catch(error => console.log('error', error));
+        .catch(error => console.log('error', error));
 }
 
 // Alimenta Objeto Clientes 
@@ -50,7 +63,10 @@ export async function ObtieneWspConectados(io) {
             // Verifica si la carpeta es válida
             if (!validFolders.includes(folder)) {
                 console.log(`Eliminando carpeta no válida: ${folderPath}`);
-                fs.rmSync(folderPath, { recursive: true, force: true });
+                fs.rmSync(folderPath, {
+                    recursive: true,
+                    force: true
+                });
             }
         });
 
@@ -78,11 +94,14 @@ export async function ObtieneWspConectados(io) {
                         '--disable-web-security',
                         '--disable-features=IsolateOrigins,site-per-process',
                     ],
-                    timeout: 0 
+                    timeout: 0
                 }
             });
 
-            clientsMap.set(element.nIdRef, {client : cl, QR : null});
+            clientsMap.set(element.nIdRef, {
+                client: cl,
+                QR: null
+            });
 
             // Esperar a que el cliente esté listo antes de continuar con el siguiente
             await new Promise((resolve, reject) => {
@@ -92,7 +111,7 @@ export async function ObtieneWspConectados(io) {
                     clientsMap.get(element.nIdRef).QR = qr;
                     //console.log(`QR para ${element.cNombreDispositivo}:`, qr);
                 });
-            
+
                 cl.on('authenticated', () => {
                     console.log(`Sesión autenticada: ${element.cNombreDispositivo}`);
                     // Update : En esta parte del codigo se elimina el QR del cliente
@@ -103,18 +122,20 @@ export async function ObtieneWspConectados(io) {
                     console.log(`Cliente listo: ${element.cNombreDispositivo}`);
                     resolve();
                 });
-                
+
                 cl.on('auth_failure', (error) => {
                     console.error(`Fallo en la autenticación para ${element.cNombreDispositivo}:`, error);
                     reject(error);
                 });
 
                 cl.on('disconnected', async (reason) => {
-                console.log('Cliente desconectado. Motivo:', reason);
-                // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
+                    console.log('Cliente desconectado. Motivo:', reason);
+                    // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
                     try {
                         await cl.destroy(); // limpia la instancia
-                        await cl.initialize({timeout:0}); // reinicia con la misma sesión
+                        await cl.initialize({
+                            timeout: 0
+                        }); // reinicia con la misma sesión
                     } catch (err) {
                         console.error('Error al reiniciar el cliente:', err);
                     }
@@ -128,7 +149,7 @@ export async function ObtieneWspConectados(io) {
                 cl.on('message_create', async (message) => {
                     try {
 
-                        console.warn('Mensaje detectado por whatsappService.js:', dayjs().format() , message.body);
+                        //console.warn('Mensaje detectado por whatsappService.js:', dayjs().format() , message.body);
 
                         const isFromMe = message.fromMe === false;
                         await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
@@ -147,17 +168,16 @@ export async function ObtieneWspConectados(io) {
                         if (message.hasMedia) {
                             const media = await message.downloadMedia();
                             if (media && ['image', 'sticker', 'ptt', 'audio'].includes(message.type)) {
-                                data.datamedia = media.data;      
-                            }
-                            else if (message.type === 'document') {
+                                data.datamedia = media.data;
+                            } else if (message.type === 'document') {
                                 data.datamedia = media.data;
                                 data.body = media.filename || 'No definido';
                             }
                         }
-                    
+
                         await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
                         // Logica para mandar mensaje a Microservicio de Google 
-                        /************ */   
+                        /************ */
                         try {
 
                             //console.log(data.body, data.to);
@@ -180,7 +200,7 @@ export async function ObtieneWspConectados(io) {
 
                             fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
                                 .catch(error => console.log('error', error));
-                            
+
                             sendWebhookNotification(raw);
 
                         } catch (error) {
@@ -195,7 +215,9 @@ export async function ObtieneWspConectados(io) {
                     }
                 });
 
-                cl.initialize({timeout: 0})
+                cl.initialize({
+                    timeout: 0
+                })
             });
 
             // Agregar el cliente al mapa después de que esté listo
@@ -215,7 +237,9 @@ export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
 
         const cConectados = await ListDevices(process.env.FIREBASE_COLECCION_SESIONES);
 
-        const cfiltrado = cConectados.filter((e) => { return e.nPhoneNumber.includes(usuario) })
+        const cfiltrado = cConectados.filter((e) => {
+            return e.nPhoneNumber.includes(usuario)
+        })
 
         if (cfiltrado.length === 0) {
             throw new Error('No se encontró una sesión para el usuario');
@@ -230,15 +254,15 @@ export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
             throw new Error('Cliente no encontrado en clientsMap');
         }
 
-            if ( tipomensaje === 'texto' ) {
-                //console.warn('Mensaje enviado desde frontend',dayjs().format(), mensaje);                
-                await cl.sendMessage(cliente, mensaje);
-            } else if (tipomensaje === 'imagen' || tipomensaje === 'pdf' || tipomensaje === 'audio') {
-                const body = new MessageMedia( mensaje.mimetype,  mensaje.data, mensaje.filename);
-                await cl.sendMessage(cliente, body);
-            } else {
-                console.log('Tipo de mensaje no soportado');
-            }
+        if (tipomensaje === 'texto') {
+            //console.warn('Mensaje enviado desde frontend',dayjs().format(), mensaje);                
+            await cl.sendMessage(cliente, mensaje);
+        } else if (tipomensaje === 'imagen' || tipomensaje === 'pdf' || tipomensaje === 'audio') {
+            const body = new MessageMedia(mensaje.mimetype, mensaje.data, mensaje.filename);
+            await cl.sendMessage(cliente, body);
+        } else {
+            console.log('Tipo de mensaje no soportado');
+        }
 
     } catch (error) {
 
@@ -255,11 +279,11 @@ export async function createClient(DeviceName, io) {
     const dFecha = new Date();
 
     const DataReg = {
-        cNombreDispositivo: DeviceName+"@c.us",
+        cNombreDispositivo: DeviceName + "@c.us",
         dFechaConexion: dFecha,
         cDataJson: "",
         nIdRef: "",
-        nPhoneNumber: DeviceName+"@c.us",
+        nPhoneNumber: DeviceName + "@c.us",
         cCategoriaDisposito: ""
     }
 
@@ -271,132 +295,146 @@ export async function createClient(DeviceName, io) {
             clientId: idFireBase
         }),
         puppeteer: {
-                    // Ejecutar en modo headless (sin interfaz gráfica)
-                    headless: true,
-                    args : [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--disable-gpu',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--single-process',
-                    '--disable-infobars',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins,site-per-process',
-                    ],
-                    timeout: 0 
+            // Ejecutar en modo headless (sin interfaz gráfica)
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-infobars',
+                '--disable-web-security',
+                '--disable-features=IsolateOrigins,site-per-process',
+            ],
+            timeout: 0
         }
     });
 
-    clientsMap.set(idFireBase, {client: client, QR : null});
+    clientsMap.set(idFireBase, {
+        client: client,
+        QR: null
+    });
 
     // Configurar eventos del cliente
 
     client.on('qr', (qr) => {
-        console.log(`QR for session ${DeviceName} received`); 
+        console.log(`QR for session ${DeviceName} received`);
         //console.log(qr);
         // Guarda QR en el mapa de clientes
         clientsMap.get(idFireBase).QR = qr;
         // Aquí, estamos enviando el QR como una cadena base64 para renderizar en el frontend
         //let qrgenerado = qrcode.generate(qr, {small:true})
-        io.emit('qr-code', { DeviceName, qrCodeUrl: qr })
+        io.emit('qr-code', {
+            DeviceName,
+            qrCodeUrl: qr
+        })
     });
 
     client.on('authenticated', async () => {
         console.log(`Client with session ${DeviceName} authenticated!`);
         await updateUser(process.env.FIREBASE_COLECCION_SESIONES, idFireBase);
-        io.emit('authenticated', { status: true })
+        io.emit('authenticated', {
+            status: true
+        })
         // Update : En esta parte del codigo se elimina el QR del cliente
         clientsMap.get(idFireBase).QR = null;
-    })    
-    
+    })
+
     client.on('ready', () => {
         console.log(`Client with session ${DeviceName} is ready!`);
-        io.emit('client-status', { DeviceName, status: 'ready' });
+        io.emit('client-status', {
+            DeviceName,
+            status: 'ready'
+        });
     });
 
     client.on('message_create', async (message) => {
-                    try {
-                        const isFromMe = message.fromMe === false;
-                        await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
+        try {
+            const isFromMe = message.fromMe === false;
+            await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? message.to : message.from, isFromMe ? message.from : message.to);
 
-                        const data = {
-                            from: message.from || 'No definido',
-                            to: message.to || 'No definido',
-                            fromMe: message.fromMe || false,
-                            type: message.type || 'No definido',
-                            body: message.body || message._data?.list?.description || 'No definido',
-                            id: message.id.id || 'No definido',
-                            time: new Date().toISOString(),
-                            datamedia: null,
-                        };
+            const data = {
+                from: message.from || 'No definido',
+                to: message.to || 'No definido',
+                fromMe: message.fromMe || false,
+                type: message.type || 'No definido',
+                body: message.body || message._data?.list?.description || 'No definido',
+                id: message.id.id || 'No definido',
+                time: new Date().toISOString(),
+                datamedia: null,
+            };
 
-                        if (message.hasMedia) {
-                            const media = await message.downloadMedia();
-                            if (media && ['image', 'sticker', 'ptt', 'audio'].includes(message.type)) {
-                                data.datamedia = media.data;      
-                            }
-                            else if (message.type === 'document') {
-                                data.datamedia = media.data;
-                                data.body = media.filename || 'No definido';
-                            }
-                        }
-                    
-                        await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
+            if (message.hasMedia) {
+                const media = await message.downloadMedia();
+                if (media && ['image', 'sticker', 'ptt', 'audio'].includes(message.type)) {
+                    data.datamedia = media.data;
+                } else if (message.type === 'document') {
+                    data.datamedia = media.data;
+                    data.body = media.filename || 'No definido';
+                }
+            }
+
+            await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
 
 
-                        // Logica para mandar mensaje a Microservicio de Google 
+            // Logica para mandar mensaje a Microservicio de Google 
 
-                        
-                        try {
 
-                            //console.log(data.body, data.to);
+            try {
 
-                            var myHeaders = new Headers();
-                            myHeaders.append("Content-Type", "application/json");
+                //console.log(data.body, data.to);
 
-                            var raw = JSON.stringify({
-                                "body": data.body,
-                                "to": data.to,
-                                "from": data.from
-                            });
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
 
-                            var requestOptions = {
-                                method: 'POST',
-                                headers: myHeaders,
-                                body: raw,
-                                redirect: 'follow'
-                            };
-
-                            fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
-                                .catch(error => console.log('error', error));
-
-                            sendWebhookNotification(raw);
-
-                        } catch (error) {
-                            console.error('Error con el microservicio', error);
-                            // No lanzamos error para que el proceso siga
-                        }
-
-                    } catch (error) {
-                        console.error('Error procesando mensaje:', error);
-                    }
+                var raw = JSON.stringify({
+                    "body": data.body,
+                    "to": data.to,
+                    "from": data.from
                 });
 
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+
+                fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
+                    .catch(error => console.log('error', error));
+
+                sendWebhookNotification(raw);
+
+            } catch (error) {
+                console.error('Error con el microservicio', error);
+                // No lanzamos error para que el proceso siga
+            }
+
+        } catch (error) {
+            console.error('Error procesando mensaje:', error);
+        }
+    });
+
     client.on('disconnected', async (reason) => {
-                console.log('Cliente desconectado. Motivo:', reason);
-                // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
-                    try {
-                        await client.destroy(); // limpia la instancia
-                        await client.initialize({timeout:0}); // reinicia con la misma sesión
-                    } catch (err) {
-                        console.error('Error al reiniciar el cliente:', err);
-                    }
+        console.log('Cliente desconectado. Motivo:', reason);
+        // Aquí puedes reiniciar el cliente y pedir un nuevo QR si es necesario
+        try {
+            await client.destroy(); // limpia la instancia
+            await client.initialize({
+                timeout: 0
+            }); // reinicia con la misma sesión
+        } catch (err) {
+            console.error('Error al reiniciar el cliente:', err);
+        }
 
     });
 
-    client.initialize({timeout: 0});
+    client.initialize({
+        timeout: 0
+    });
     return client;
 }

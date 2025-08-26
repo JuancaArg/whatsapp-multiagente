@@ -208,5 +208,23 @@ Recuerda que la pc o laptop debe estar activa para que se puedan descargar de ma
 //
 `¿Quieres tener mas oportunidades de venta? Usando nuestro software lo lograrás 🤩 ¿Te interesa? Escríbenos y nos contactamos 🤗`,
 //
-`Inicia con el 50% y contarás con nuestro embudo de ventas 🌟. Déjanos un mensaje y nos contactámos nuevamente contigo para poder ayudarte 🙌🏻`
+`Inicia con el 50% y contarás con nuestro embudo de ventas 🌟. Déjanos un mensaje y nos contactámos nuevamente contigo para poder ayudarte 🙌🏻`,
+//
+`¡Buen día! ✨ Te recordamos agregar la información al documento de Drive, así podremos continuar con los diseños pendientes 🚨✨`,
+//
+`¡Buen día! ✨ Te enviamos los diseños para que les des un vistazo. Apenas nos confirmes, los pasamos al analista y ponemos en marcha tu campaña 📨`,
+//
+`•Pago mensual de 70$ ➡️ se te entrega el generador de licencia donde puedes generar licencias ilimitadas, para que estas licencias se mantenga activas debes cancelarnos mensualmente , te brindamos el sistema todo en blanco y salimos como desarrolladores.
+
+•Plan admi de 700$ ➡️ se te brinda el generador de licencias ilimitadas con el sistema personalizado con tu nombre y logo que des para la extensión de igual forma salimos como desarrolladores.
+
+🌟La facilidad de pago que te damos aquí es que puedas iniciar con 350$ y pasando 1 mes canceles los otros 350$ para completar el pago.
+
+•Marca blanca de 2700$ ➡️ se te brinda el generador de licencias ilimitadas junto al código fuente que es el código abierto de la herramienta con ella puedes agregar y quitar funciones como desees porque es como si usted lo hubiera desarrollado.
+🚨Alquiler del servidor: Para la creación del generador de licencias (puede variar desde 5$ mensual) + creación del dominio (desde 8$ anuales).
+🚨Almacenamiento en la nube: Depende de los clientes que pueda tener es que varía el precio mensual (puede ser desde s/.5.00 mensuales).
+
+🌟La facilidad de pago que te damos aquí es que puedas iniciar con 900$, pasando 1 mes canceles la segunda cuota de 900$ y en el 3er mes canceles los últimos 900$ para completar el pago.
+
+🗯️Recuerda que las ventas, instalaciones, capacitaciones y soporte es labor tuya hacia tus clientes, nosotros te brindamos el soporte únicamente a ti😊🙌🏻`
 ] 

@@ -4,4 +4,4 @@ export const conexiones = {
     front1 : "https://192.168.100.100:3000/"
 }
 
-export const LineasBloqueadas = ['51994698576','51986230303']
+export const LineasBloqueadas = ['51994698576','51986230303','51967439174']
