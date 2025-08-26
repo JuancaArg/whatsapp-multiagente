@@ -1,0 +1,26 @@
+import { Router } from "express";
+import {MetaController} from '../Controller/MetaController.js';
+const router = Router();
+
+const verifyToken = process.env.VERIFY_TOKEN || 'my_verify_token';
+
+// Route for GET requests
+router.get('/', (req, res) => {
+  const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
+
+  if (mode === 'subscribe' && token === verifyToken) {
+    res.status(200).send(challenge);
+  } else {
+    res.status(403).end();
+  }
+});
+
+// Route for POST requests
+router.post('/', (req, res) => {
+
+    MetaController(req.body);
+    res.status(200).end();
+  
+});
+
+export default router;

@@ -42,6 +42,7 @@ import {
     clientsMap
 } from './variables/ChatsTiempoReal.js';
 
+import RouteMeta from './routes/meta.js';
 
 // Crear la aplicación Express
 const app = express();
@@ -54,6 +55,10 @@ app.use(cors({
 app.use(express.json({
     limit: '10mb'
 })); // <-- necesario para leer JSON
+
+// Importar rutas
+
+app.use('/meta', RouteMeta);
 
 // Crear servidor HTTP
 const server = https.createServer(credentials, app);
