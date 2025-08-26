@@ -233,7 +233,7 @@ export const BuscaUltimosMensajes = async (collec, cCliente, cUsuario, limitCoun
 
 let subscriptions = new Map();
 
-export const SearchContentChatTimeReal = (collec, cCliente, cUsuario, maxTime, io, connectedUsers, socket_id) => {
+export const SearchContentChatTimeReal = (collec, cCliente, cUsuario, maxTime, io) => {
 
   // Crear una clave única para cada par cCliente - cUsuario
 
