@@ -18,9 +18,11 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase": "^11.1.0",
+    "node-fetch": "^3.3.2",
     "https": "^1.0.0",
     "nodemon": "^3.1.10",
     "socket.io": "^4.8.1",
-    "whatsapp-web.js": "^1.31.0"
+    "whatsapp-web.js": "^1.31.0",
+    "request": "^2.88.2"
   }
 }

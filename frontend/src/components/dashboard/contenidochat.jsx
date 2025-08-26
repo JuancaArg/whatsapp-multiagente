@@ -714,7 +714,7 @@ function MensajeEnviadoCliente({ infodatos }) {
     return (
         <div className="bg-green-100 self-start px-4 py-2 rounded-xl max-w-lg shadow text-sm text-gray-800 mb-1">
             {
-                infodatos.type === 'chat' || infodatos.type === 'list_response' ? (
+                infodatos.type === 'chat' || infodatos.type === 'list_response' || ['texto','text'].includes(infodatos.type) ? (
                     <p className="whitespace-pre-line break-words break-all">{infodatos.body.filename || infodatos.body}</p>
                 ) : infodatos.type === 'image' ? (
                     <>
@@ -752,7 +752,7 @@ function MensajeEnviadoUsuario({ infodatos }) {
     return (
         <div className="bg-white self-end px-4 py-2 rounded-xl max-w-lg shadow text-sm text-gray-800 border border-gray-200 mb-1">
             {
-                infodatos.type === 'chat' || infodatos.type === 'list_response' ? (
+                infodatos.type === 'chat' || infodatos.type === 'list_response'  || ['texto','text'].includes(infodatos.type) ? (
                     <p className="whitespace-pre-line break-words break-all">{infodatos.body.filename || infodatos.body}</p>
                 ) : infodatos.type === 'image' ? (
                     <>
