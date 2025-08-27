@@ -5,13 +5,16 @@ export const RetornoTipoMensaje = (tipo) => {
         text: 'texto',
         image: 'image',
         video: 'Video',
-        audio: 'Audio',
-        document: 'Documento',
-        sticker: 'Sticker',
+        audio: 'audio',
+        document: 'document',
+        sticker: 'image',
         location: 'Ubicación',
         contacts: 'Contacto',
         button: 'Botón',
         interactive: 'Interactivo',
+        imagen: 'image',
+        pdf: 'document',
+        texto: 'texto'
         // Agrega más mapeos según sea necesario
     };
 

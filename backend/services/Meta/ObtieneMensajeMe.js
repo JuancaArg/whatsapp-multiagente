@@ -1,10 +1,28 @@
+import {ObtenerRegistroColeccion} from '../firebase.js';
+import dotenv from 'dotenv'
+dotenv.config();
+
 export const ObtieneDataMensajeisMe = async (id) => {
 
-    // Aca se debe realizar un cruce con la BBDD para obtener el tipo de mensaje
+  const maxIntentos = 4;
+  const coleccion = process.env.FIREBASE_COLECCION_MENSAJESAPI;
 
-    return {
-        tipo: 'texto',
-        mensaje: 'Este es un mensaje de ejemplo'
-    }; // Ejemplo: retorna 'text' como tipo de mensaje
+  for (let intento = 1; intento <= maxIntentos; intento++) {
+    const data = await ObtenerRegistroColeccion(coleccion, id);
 
-}
+    if (data) {
+      return data;
+    }
+
+    console.log(`🔁 Intento ${intento} fallido.`);
+
+    if (intento < maxIntentos) {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 segundo
+    }
+  }
+
+  console.warn('❌ No se encontró el documento después de 4 intentos.');
+  return null;
+  
+};
+

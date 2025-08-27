@@ -7,10 +7,10 @@ export const InsertaMensajeFirebase = async (data) => {
 
     try {
         // Lógica para insertar el mensaje en Firebase
-        console.log('Inserting message into Firebase:', data);
+        //console.log('Inserting message into Firebase:', data);
 
         const formato = {
-            body : data.cMensaje,
+            body : data.cMensaje || null,
             datamedia : data.datamedia || null,
             from : data.isMe ? '15551777161' : data.cNumberCliente, // Numero de la empresa Cambiar por variable de entorno
             fromMe : data.isMe,

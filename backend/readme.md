@@ -2,9 +2,10 @@
 
 ## Tabla de tipos de mensaje
 
-| Tipos de Datos | Comentario  |
-|----------------|-------------|
-| Texto          | Texto Plano |
-| Image          | Imagen      |
+| Tipos de Wsp Api | Comentario       |
+|------------------|------------------|
+| Texto            | Texto Plano      |
+| Image            | Imagen y Sticker |
+| audio            | Audio            |
 
 
