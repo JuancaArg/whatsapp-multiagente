@@ -695,7 +695,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
                 ${origen && "ring-2 ring-yellow-900 ring-offset ring-offset shadow-[0_0_10px_4px_rgba(168,85,247,0.6)]"}`}
                 type="text"
                 placeholder="Escribe un mensaje 💬"
-                disabled= {!slaapi}
+                //disabled= {!slaapi}
                 onChange={(e) => {
                     setMessage(e.target.value);
                     handleRespuestaRapida(e.target.value);

@@ -12,11 +12,11 @@ export const InsertaMensajeFirebase = async (data) => {
         const formato = {
             body : data.cMensaje || null,
             datamedia : data.datamedia || null,
-            from : data.isMe ? '15551777161' : data.cNumberCliente, // Numero de la empresa Cambiar por variable de entorno
+            from : data.isMe ? '51968782524' : data.cNumberCliente, // Numero de la empresa Cambiar por variable de entorno
             fromMe : data.isMe,
             id : data.nIdMensaje,
             time : data.dFechaMensaje,
-            to : data.isMe ? data.cNumberCliente : '15551777161', // Numero de la empresa Cambiar por variable de entorno
+            to : data.isMe ? data.cNumberCliente : '51968782524', // Numero de la empresa Cambiar por variable de entorno
             type : data.cTipoMensaje,
             origen : data.Origen
         }
