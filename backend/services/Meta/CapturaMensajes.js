@@ -7,7 +7,7 @@ export const CapturaMensajes = async (body) => {
 
     try {
         
-        console.log('Received POST request with body desde CapturaMensajes.js :', body);
+        //console.log('Received POST request with body desde CapturaMensajes.js :', JSON.stringify(body));
 
         // Formata el mensaje recibido
 
@@ -18,7 +18,7 @@ export const CapturaMensajes = async (body) => {
         let dFechaMensaje = new Date().toISOString();
         let Origen = 'Whatsapp API';
         let cTipoMensaje = !isMe ? body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.type : null;
-        let cMensaje;
+        let cMensaje = null;
         let datamedia = null;
 
         // Actualiza el tipo de mensaje a formato interno
@@ -29,8 +29,19 @@ export const CapturaMensajes = async (body) => {
             cMensaje  = !isMe ? body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.text?.body : null;
         }else if (cTipoMensaje === 'image'){
             cMensaje  = !isMe ? body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.image?.caption : null;
-            datamedia = (await DescargaMedia(body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.image?.id)).base64;
-        }
+            const image =  body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.image?.id 
+                        || body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.sticker?.id
+                        || null;
+            datamedia = (await DescargaMedia(image)).base64;
+        }else if (cTipoMensaje === 'audio'){
+            const audio =  body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.audio?.id || null;
+            datamedia = (await DescargaMedia(audio)).base64;
+        }else if (cTipoMensaje === 'document'){
+            const document =  body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.document?.id || null;
+            const res = await DescargaMedia(document)
+            console.log('res ', res);
+            res?.error === 'si' ? (datamedia = null, cMensaje = res?.mensaje, cTipoMensaje = 'texto') : datamedia = res?.base64;
+        }        
 
         if (isMe){
             // Solo continua el proceso si el mensaje tiene como status 'sent'
@@ -40,10 +51,14 @@ export const CapturaMensajes = async (body) => {
                 const dataMensaje = await ObtieneDataMensajeisMe(id);
 
                 cNumberCliente = body?.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]?.recipient_id;
-                cTipoMensaje = dataMensaje.tipo;
-                cMensaje = dataMensaje.mensaje;
+                cTipoMensaje = RetornoTipoMensaje(dataMensaje.res.tipomensaje);
+                cMensaje = ['image','document'].includes(cTipoMensaje) ? null : dataMensaje.res.message ;
+                datamedia = dataMensaje.res.message.data || null;
                 nIdMensaje = id;
             }
+            else {
+                return; // Sale de la funcion si el mensaje no es 'sent'
+            }            
         }
 
         const data = {
@@ -58,6 +73,7 @@ export const CapturaMensajes = async (body) => {
             Origen
         };
 
+        //console.log('📩 Formatted message data:', data);
         InsertaMensajeFirebase(data);
 
     } catch (error) {

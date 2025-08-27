@@ -48,6 +48,15 @@ export async function DescargaMedia(idMedia, accessToken = process.env.META_WHAT
     );
   }
 
+  const contentLength = mediaRes.headers.get("content-length");
+  const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+  if (contentLength && parseInt(contentLength) > maxSizeBytes) {
+    return {error: 'si', 'mensaje': 'Mensaje del sistema - El archivo que envio el cliente es demasiado grande. Maximo 5MB'};
+    throw new Error(`El archivo es demasiado grande (${contentLength} bytes). Máximo permitido: ${maxSizeBytes} bytes`);
+  }
+
+
   // 3) Convertir a base64
   const buffer = Buffer.from(await mediaRes.arrayBuffer());
   const base64 = buffer.toString("base64");

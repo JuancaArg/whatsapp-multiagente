@@ -15,6 +15,7 @@ services:
       - prod
 
   backend-env:
+    platform: "linux/amd64"
     build:
       context: .
       dockerfile: dockerfile.dev

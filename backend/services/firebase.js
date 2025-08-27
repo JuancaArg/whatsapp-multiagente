@@ -10,13 +10,15 @@ import {
   doc,
   getDocs,
   addDoc,
+  getDoc,
   updateDoc,
   query,
   where,
   onSnapshot,
   orderBy,
   limit,
-  deleteDoc
+  deleteDoc,
+  setDoc
 } from "firebase/firestore";
 import dotenv from 'dotenv'
 import { Suscripcion_ChatAbierto, Timer_Expiracion_Chat, TIEMPO_EXPIRACION_MS } from '../variables/ChatsTiempoReal.js';
@@ -440,3 +442,21 @@ export const Sesion_Eliminar = async ( coleccion , id ) => {
     console.error("Error al eliminar el documento:", error);
   }
 }
+
+export const InsertaRegistroCollecion = async (coleccion, data , id) => {
+  const docRef = doc(db, coleccion, id);
+  await setDoc(docRef, data);
+  return docRef.id;
+
+}
+
+export const ObtenerRegistroColeccion = async (coleccion, id) => {
+  const docRef = doc(db, coleccion, id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return docSnap.data(); // o { id: docSnap.id, ...docSnap.data() } si quieres incluir el ID
+  } else {
+    return null; // o lanzar un error si prefieres
+  }
+};

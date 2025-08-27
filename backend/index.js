@@ -44,6 +44,8 @@ import {
 
 import RouteMeta from './routes/meta.js';
 
+import { MetaControladorFunciones } from './Controller/MetaController.js';
+
 // Crear la aplicación Express
 const app = express();
 
@@ -64,6 +66,7 @@ app.use('/meta', RouteMeta);
 const server = https.createServer(credentials, app);
 
 // Configurar Socket.IO
+console.log(process.env.URL_FRONTEND_LOCAL);
 const io = new socketIo(server, {
     cors: {
         origin: [process.env.URL_FRONTEND_LOCAL, process.env.URL_FRONTEND_TAILSCALE] || '*', // Puedes permitir solicitudes desde cualquier origen o desde uno específico
@@ -78,6 +81,7 @@ ObtieneWspConectados(io);
 
 // Conectar Socket.IO
 io.on('connection', (socket) => {
+
     socket.on('create-client', (DeviceName) => {
         console.log(`Creating client with session: ${DeviceName}`);
         createClient(DeviceName, io); // Crear un cliente de WhatsApp y vincularlo a Socket.IO
@@ -105,7 +109,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('send-message-chat', async (e) => {
-        await enviaMensaje(e.message, e.cCliente, e.cUsuario, e.tipomensaje);
+        e.origen === true ? MetaControladorFunciones('Mensaje_envio',e) : await enviaMensaje(e.message, e.cCliente, e.cUsuario, e.tipomensaje);
     })
 
     socket.on('message-search-contacto-req', async (e) => {
