@@ -27,7 +27,7 @@ const SendTextSimple = (to,mensaje,data) => {
     return new Promise((resolve, reject) => {
         var options = {
         'method': 'POST',
-        'url': 'https://graph.facebook.com/v22.0/794952240363908/messages',
+        'url': 'https://graph.facebook.com/v22.0/717333071471269/messages',
         'headers': {
             'Content-Type': ['application/json', 'application/json'],
             'Authorization': 'Bearer '+ process.env.META_WHATSAPP_TOKEN
@@ -66,7 +66,7 @@ const sendImageandText = async (to, mensaje, imagen, data) => {
     return new Promise((resolve, reject) => {
         var options = {
         'method': 'POST',
-        'url': 'https://graph.facebook.com/v22.0/794952240363908/messages',
+        'url': 'https://graph.facebook.com/v22.0/717333071471269/messages',
         'headers': {
             'Content-Type': ['application/json', 'application/json']
             ,'Authorization': 'Bearer '+ process.env.META_WHATSAPP_TOKEN
@@ -108,7 +108,7 @@ const ApiUploadImage = (payload) => {
 
         const options = {
             method: 'POST',
-            url: 'https://graph.facebook.com/v22.0/794952240363908/media',
+            url: 'https://graph.facebook.com/v22.0/717333071471269/media',
             headers: {
                 'Authorization': 'Bearer ' + process.env.META_WHATSAPP_TOKEN
             },

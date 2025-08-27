@@ -541,7 +541,7 @@ function RespuestasRapidas({ respuestarapida, setRespuestarapida, setMensajerrs 
 }
 
 
-function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestarapida, mensajerrs, origen }) {
+function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestarapida, mensajerrs, origen, slaapi}) {
 
     const [message, setMessage] = useState('');
     const [handleMymetype, setHandleMymetype] = useState('');
@@ -555,7 +555,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
     }, [handleMymetype]);
 
     const handleSend = () => {
-        const data = { 'message': message, 'cCliente': dataclic, 'cUsuario': dataclicuser, 'tipomensaje': 'texto' , 'origen' : origen }
+        const data = { 'message': message, 'cCliente': dataclic, 'cUsuario': dataclicuser, 'tipomensaje': 'texto', 'origen': origen }
         socket.emit('send-message-chat', data)
         setMessage('');
         setRespuestarapida('');
@@ -591,7 +591,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
                 reader.onload = () => {
                     const base64Data = reader.result.split(',')[1];
                     //console.log(base64Data);
-                    const body = { 'message': { mimetype: 'image', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'imagen' , 'origen' : origen }
+                    const body = { 'message': { mimetype: 'image', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'imagen', 'origen': origen }
                     //console.log(body);
                     socket.emit('send-message-chat', body);
                 };
@@ -616,7 +616,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
                 reader.readAsDataURL(file);
                 reader.onload = () => {
                     const base64Data = reader.result.split(',')[1];
-                    const body = { 'message': { mimetype: 'document', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'pdf', 'origen' : origen }
+                    const body = { 'message': { mimetype: 'document', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'pdf', 'origen': origen }
                     socket.emit('send-message-chat', body);
                 }
             } else {
@@ -646,7 +646,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
             cCliente: dataclic,
             cUsuario: dataclicuser,
             tipomensaje: 'audio',
-            'origen' : origen
+            'origen': origen
         };
 
         //console.log(body);
@@ -694,7 +694,8 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
                 className={`rounded-md w-full text-xs px-3 py-2 resize-none bg-white/10 text-white placeholder:text-gray-300 focus:outline-none
                 ${origen && "ring-2 ring-yellow-900 ring-offset ring-offset shadow-[0_0_10px_4px_rgba(168,85,247,0.6)]"}`}
                 type="text"
-                placeholder="Escribe un mensaje 💬"                
+                placeholder="Escribe un mensaje 💬"
+                disabled= {!slaapi}
                 onChange={(e) => {
                     setMessage(e.target.value);
                     handleRespuestaRapida(e.target.value);
@@ -722,7 +723,7 @@ function MensajeEnviadoCliente({ infodatos }) {
     return (
         <div className="bg-green-100 self-start px-4 py-2 rounded-xl max-w-lg shadow text-sm text-gray-800 mb-1">
             {
-                infodatos.type === 'chat' || infodatos.type === 'list_response' || ['texto','text'].includes(infodatos.type) ? (
+                infodatos.type === 'chat' || infodatos.type === 'list_response' || ['texto', 'text'].includes(infodatos.type) ? (
                     <p className="whitespace-pre-line break-words break-all">{infodatos.body.filename || infodatos.body}</p>
                 ) : infodatos.type === 'image' ? (
                     <>
@@ -760,7 +761,7 @@ function MensajeEnviadoUsuario({ infodatos }) {
     return (
         <div className="bg-white self-end px-4 py-2 rounded-xl max-w-lg shadow text-sm text-gray-800 border border-gray-200 mb-1">
             {
-                infodatos.type === 'chat' || infodatos.type === 'list_response'  || ['texto','text'].includes(infodatos.type) ? (
+                infodatos.type === 'chat' || infodatos.type === 'list_response' || ['texto', 'text'].includes(infodatos.type) ? (
                     <p className="whitespace-pre-line break-words break-all">{infodatos.body.filename || infodatos.body}</p>
                 ) : infodatos.type === 'image' ? (
                     <>
@@ -795,7 +796,7 @@ function MensajeEnviadoUsuario({ infodatos }) {
 }
 
 
-function DetalleChat({ dataclic, dataclicuser, setOrigen, origen }) {
+function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi , slaapi }) {
 
     const [firtload, setFirtload] = useState(true);
     const [load, setLoad] = useState(true);
@@ -827,6 +828,23 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen }) {
             })
             const ordenado = newfilter.sort((a, b) => new Date(a.time) - new Date(b.time));
             const origen = ordenado.find(i => i?.origen?.includes('API')) ? true : false;
+            console.log('Origen del chat:', ordenado);
+            /* Hota */
+
+            if (ordenado?.[ordenado.length - 1]) {
+                const ultimaHora = new Date(ordenado[ordenado.length - 1].time);
+                const ahora = new Date();
+
+                // Diferencia en milisegundos
+                const diffMs = ahora - ultimaHora;
+
+                // Pasar a minutos
+                const diffMin = Math.floor(diffMs / (1000 * 60));
+
+                diffMin >= 1440 ? setSlaapi(false) : setSlaapi(true);
+            }
+            /**/
+            debugger;
             setOrigen(origen);
             setDatachatclienteuni(ordenado);
             setScroll(false); // Habilitamos el scroll para que se haga una vez
@@ -965,6 +983,7 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen }) {
                     setRespuestarapida={setRespuestarapida}
                     mensajerrs={mensajerrs}
                     origen={origen}
+                    slaapi={slaapi}
                 />
             </div>
 
@@ -973,7 +992,7 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen }) {
 
 }
 
-function Cabecerachat({ dataclic, dataclicuser, origen }) {
+function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
 
     /* Hooks de Dropdown */
 
@@ -1084,7 +1103,21 @@ function Cabecerachat({ dataclic, dataclicuser, origen }) {
                                 API
                             </div>
                         )
-                    }                    
+                    }
+                    {/* si slaapi es true que muestre desntro de las 24 horas */}
+                    {
+                        origen && (slaapi ? (
+                            <div className="bg-lime-400 text-black text-xs font-semibold px-3 py-1 rounded-full shadow">
+                                🟢 Dentro de 24H
+                            </div>
+                        ) : (
+                            <div className="bg-gray-400 text-black text-xs font-semibold px-3 py-1 rounded-full shadow">
+                                🔴 Fuera de 24H
+                            </div>
+                        )
+                        )
+                    }
+                    {/* Mensaje de copiado */}
                     <div className="relative w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
                         <ClipboardDocumentListIcon
                             className="text-white w-5 h-5 cursor-pointer"
@@ -1142,11 +1175,12 @@ function Cabecerachat({ dataclic, dataclicuser, origen }) {
 export default function ContenidoChat({ dataclic, dataclicuser }) {
 
     const [origen, setOrigen] = useState(false);
+    const [slaapi, setSlaapi] = useState(true);
 
     return (
         <div className="flex-1 py-4 flex flex-col h-full">
-            <Cabecerachat dataclic={dataclic} dataclicuser={dataclicuser} origen={origen} />
-            <DetalleChat dataclic={dataclic} dataclicuser={dataclicuser} setOrigen={setOrigen} origen={origen} />
+            <Cabecerachat dataclic={dataclic} dataclicuser={dataclicuser} origen={origen} slaapi={slaapi} />
+            <DetalleChat dataclic={dataclic} dataclicuser={dataclicuser} setOrigen={setOrigen} origen={origen} setSlaapi={setSlaapi} slaapi={slaapi}/>
         </div>
     )
 }
