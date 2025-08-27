@@ -228,7 +228,7 @@ export default function Example() {
                     <p className="text-white text-xs sm:text-sm font-semibold text-center">
                         {conectados ? (
                             '✅ Estás conectado y tienes los permisos de acceso necesarios'
-                        ) : window.location.href.includes(conexiones.front1) ? (
+                        ) : window.location.href.includes(conexiones.front1) ? (                            
                             <>
                                 Estás presencial, pero te faltan los permisos de acceso ➡️{' '}
                                 <a

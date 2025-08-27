@@ -541,7 +541,7 @@ function RespuestasRapidas({ respuestarapida, setRespuestarapida, setMensajerrs 
 }
 
 
-function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestarapida, mensajerrs }) {
+function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestarapida, mensajerrs, origen }) {
 
     const [message, setMessage] = useState('');
     const [handleMymetype, setHandleMymetype] = useState('');
@@ -555,7 +555,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
     }, [handleMymetype]);
 
     const handleSend = () => {
-        const data = { 'message': message, 'cCliente': dataclic, 'cUsuario': dataclicuser, 'tipomensaje': 'texto' }
+        const data = { 'message': message, 'cCliente': dataclic, 'cUsuario': dataclicuser, 'tipomensaje': 'texto' , 'origen' : origen }
         socket.emit('send-message-chat', data)
         setMessage('');
         setRespuestarapida('');
@@ -578,6 +578,12 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
         const file = event.target.files[0];
         //console.log(file);
         if (file) {
+            const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!tiposPermitidos.includes(file.type)) {
+                alert('Solo se permiten archivos JPG, PNG o GIF');
+                return;
+            }
+
             if (file.size <= 700000) {
                 // convertir imagen a base64 y imprimir valor en consola
                 const reader = new FileReader();
@@ -585,7 +591,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
                 reader.onload = () => {
                     const base64Data = reader.result.split(',')[1];
                     //console.log(base64Data);
-                    const body = { 'message': { mimetype: 'image', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'imagen' }
+                    const body = { 'message': { mimetype: 'image', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'imagen' , 'origen' : origen }
                     //console.log(body);
                     socket.emit('send-message-chat', body);
                 };
@@ -610,7 +616,7 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
                 reader.readAsDataURL(file);
                 reader.onload = () => {
                     const base64Data = reader.result.split(',')[1];
-                    const body = { 'message': { mimetype: 'document', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'pdf' }
+                    const body = { 'message': { mimetype: 'document', data: base64Data, filename: file.name }, 'cCliente': dataclic, 'cUsuario': dataclicuser, tipomensaje: 'pdf', 'origen' : origen }
                     socket.emit('send-message-chat', body);
                 }
             } else {
@@ -639,7 +645,8 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
             },
             cCliente: dataclic,
             cUsuario: dataclicuser,
-            tipomensaje: 'audio'
+            tipomensaje: 'audio',
+            'origen' : origen
         };
 
         //console.log(body);
@@ -684,9 +691,10 @@ function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestar
 
             {/* Campo de texto */}
             <textarea
-                className="rounded-md w-full text-xs px-3 py-2 resize-none bg-white/10 text-white placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-white"
+                className={`rounded-md w-full text-xs px-3 py-2 resize-none bg-white/10 text-white placeholder:text-gray-300 focus:outline-none
+                ${origen && "ring-2 ring-yellow-900 ring-offset ring-offset shadow-[0_0_10px_4px_rgba(168,85,247,0.6)]"}`}
                 type="text"
-                placeholder="Escribe un mensaje 💬"
+                placeholder="Escribe un mensaje 💬"                
                 onChange={(e) => {
                     setMessage(e.target.value);
                     handleRespuestaRapida(e.target.value);
@@ -728,7 +736,7 @@ function MensajeEnviadoCliente({ infodatos }) {
                 ) : infodatos.type === 'list' ? (
                     <p>{infodatos.body}</p>
                 ) : infodatos.type === 'document' ? (
-                    <a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-600 underline" download={infodatos.body}>{infodatos.body}</a>
+                    <a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-600 underline" download={infodatos.body}>{infodatos.body || "Descargar PDF"}</a>
                 ) : (
                     <p>Tipo Mensaje: {infodatos.body} - {infodatos.type}</p>
                 )
@@ -766,7 +774,7 @@ function MensajeEnviadoUsuario({ infodatos }) {
                 ) : infodatos.type === 'list' ? (
                     <p>{infodatos.body}</p>
                 ) : infodatos.type === 'document' ? (
-                    <a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-600 underline" download={infodatos.body}>{infodatos.body}</a>
+                    <a href={`data:application/pdf;base64,${infodatos.datamedia}`} className="text-blue-600 underline" download={infodatos.body}>{infodatos.body || "Descargar PDF"}</a>
                 ) : (
                     <p>Tipo Mensaje: {infodatos.body} - {infodatos.type}</p>
                 )
@@ -787,7 +795,7 @@ function MensajeEnviadoUsuario({ infodatos }) {
 }
 
 
-function DetalleChat({ dataclic, dataclicuser }) {
+function DetalleChat({ dataclic, dataclicuser, setOrigen, origen }) {
 
     const [firtload, setFirtload] = useState(true);
     const [load, setLoad] = useState(true);
@@ -818,6 +826,8 @@ function DetalleChat({ dataclic, dataclicuser }) {
                 return !(i.to === i.from)
             })
             const ordenado = newfilter.sort((a, b) => new Date(a.time) - new Date(b.time));
+            const origen = ordenado.find(i => i?.origen?.includes('API')) ? true : false;
+            setOrigen(origen);
             setDatachatclienteuni(ordenado);
             setScroll(false); // Habilitamos el scroll para que se haga una vez
             setLoad(false);
@@ -872,9 +882,6 @@ function DetalleChat({ dataclic, dataclicuser }) {
 
             console.log('Nuevo mensaje recibido:', e.data);
 
-            //console.log(e);
-            //console.log(dataclicRef,'|' ,dataclicuserRef);
-
             // filtra e.data donde dataclicRef y dataclicuserRef coincidan
 
             const mensaje = e.data;
@@ -886,11 +893,6 @@ function DetalleChat({ dataclic, dataclicuser }) {
             console.log('Nuevo mensaje filtrado:', esEntreUsuarios);
 
             // Usar las referencias para acceder a los valores más actuales 
-
-            //const filtrado = e.data.filter(item =>
-            //    (item.from === dataclicRef.current && item.to === dataclicuserRef.current) ||
-            //    (item.from === dataclicuserRef.current && item.to === dataclicRef.current)
-            //);
 
             //console.log('filtrado', dataclicRef.current, dataclicuserRef.current, filtrado);
             if (esEntreUsuarios) {
@@ -962,6 +964,7 @@ function DetalleChat({ dataclic, dataclicuser }) {
                     respuestarapida={respuestarapida}
                     setRespuestarapida={setRespuestarapida}
                     mensajerrs={mensajerrs}
+                    origen={origen}
                 />
             </div>
 
@@ -970,7 +973,7 @@ function DetalleChat({ dataclic, dataclicuser }) {
 
 }
 
-function Cabecerachat({ dataclic, dataclicuser }) {
+function Cabecerachat({ dataclic, dataclicuser, origen }) {
 
     /* Hooks de Dropdown */
 
@@ -1074,6 +1077,14 @@ function Cabecerachat({ dataclic, dataclicuser }) {
                     <div className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
                         🟢 WSP {dataclicuser.replace("@c.us", "")}
                     </div>
+                    {/* Origen */}
+                    {
+                        origen && (
+                            <div className="bg-yellow-400 text-black text-xs font-semibold px-3 py-1 rounded-full shadow">
+                                API
+                            </div>
+                        )
+                    }                    
                     <div className="relative w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
                         <ClipboardDocumentListIcon
                             className="text-white w-5 h-5 cursor-pointer"
@@ -1081,7 +1092,6 @@ function Cabecerachat({ dataclic, dataclicuser }) {
                         />
                     </div>
                 </div>
-
 
                 {/* Botones de acciones */}
                 <div className="relative" ref={dropdownRef}>
@@ -1130,10 +1140,13 @@ function Cabecerachat({ dataclic, dataclicuser }) {
 
 
 export default function ContenidoChat({ dataclic, dataclicuser }) {
+
+    const [origen, setOrigen] = useState(false);
+
     return (
         <div className="flex-1 py-4 flex flex-col h-full">
-            <Cabecerachat dataclic={dataclic} dataclicuser={dataclicuser} />
-            <DetalleChat dataclic={dataclic} dataclicuser={dataclicuser} />
+            <Cabecerachat dataclic={dataclic} dataclicuser={dataclicuser} origen={origen} />
+            <DetalleChat dataclic={dataclic} dataclicuser={dataclicuser} setOrigen={setOrigen} origen={origen} />
         </div>
     )
 }
