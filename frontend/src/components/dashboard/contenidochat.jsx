@@ -1,20 +1,22 @@
-import { CheckIcon, DocumentIcon, EyeIcon, ListBulletIcon, MicrophoneIcon, PaperAirplaneIcon, PhotoIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline"
-import { useState, useEffect, use, useRef } from "react";
+import { CheckIcon, DocumentIcon, EyeIcon, PaperAirplaneIcon, PhotoIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline"
+import { useState, useEffect, useRef, use } from "react";
 import { io } from "socket.io-client";
 import { varrr } from "./variables/rs";
 import { conexiones } from './variables/env';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import AudioRecorder from "./func_audio";
 import { ImSpinner3 } from "react-icons/im";
+import Componente_Modal from "../ui/dialog";
+import {EnvioMensajeWspWeb} from '../Servicios/EnvioMensajeWspWeb.js'
 
+let socket;
 
 if (window.location.href.includes(conexiones.front1)) {
-    var socket = io(conexiones.back1, {
+    socket = io(conexiones.back1, {
         withCredentials: true
     });
 } else {
-    var socket = io(conexiones.back2, {
+    socket = io(conexiones.back2, {
         withCredentials: true
     });
 }
@@ -541,7 +543,7 @@ function RespuestasRapidas({ respuestarapida, setRespuestarapida, setMensajerrs 
 }
 
 
-function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestarapida, mensajerrs, origen, slaapi}) {
+function BarradeMensaje({ dataclic, dataclicuser, respuestarapida, setRespuestarapida, mensajerrs, origen, slaapi }) {
 
     const [message, setMessage] = useState('');
     const [handleMymetype, setHandleMymetype] = useState('');
@@ -796,7 +798,7 @@ function MensajeEnviadoUsuario({ infodatos }) {
 }
 
 
-function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi , slaapi }) {
+function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi, slaapi }) {
 
     const [firtload, setFirtload] = useState(true);
     const [load, setLoad] = useState(true);
@@ -844,7 +846,6 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi , sl
                 diffMin >= 1440 ? setSlaapi(false) : setSlaapi(true);
             }
             /**/
-            debugger;
             setOrigen(origen);
             setDatachatclienteuni(ordenado);
             setScroll(false); // Habilitamos el scroll para que se haga una vez
@@ -1003,6 +1004,7 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
     const [openModalConsulta, setOpenModalConsulta] = useState(false);
     const [copiado, setCopiado] = useState(false);
 
+
     /* Logica de DropDown */
 
     const handleToggle = () => {
@@ -1022,6 +1024,62 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
         };
     }, []);
 
+    /* Pidiendo listado de conexiones */
+
+    const [loadOpenDiaplogNuevoChat, setLoadOpenDiaplogNuevoChat] = useState(false);
+    const [openDialogNuevoChat, setOpenDialogNuevoChat] = useState(false);
+    const [propsNuevoChat, setPropsNuevoChat] = useState({});
+    const [SolicitudCuerpoEnvio, setSolicitudCuerpoEnvio] = useState({
+        from : '',
+        to : '',
+        message : ''
+    })
+
+    useEffect(() => {
+        if (loadOpenDiaplogNuevoChat) {
+            socket.emit('list-devices-req');
+            socket.on('list-devices-res', (e) => {
+                const datos = {
+                    title: "Crear Nuevo Chat",
+                    description: "Seleccionar linea para crear nuevo chat",
+                    components: null,
+                    icon: null,
+                    colorIcon: "bg-green-700",
+                    colorFondoIcon: "bg-green-200",
+                    actionText: "Crear Chat",
+                    onAction: ()=>EnvioMensajeWspWeb(SolicitudCuerpoEnvio) && setOpenDialogNuevoChat(false),
+                    cancelText: "Cerrar",
+                    conexiones: e.data
+                }
+
+                datos.components = (
+                    <>
+                        <select className='w-full border rounded p-2 mt-3 mb-2' onChange={(e) => setSolicitudCuerpoEnvio(prev => ({...prev, from: e.target.value}))}>
+                            <option value="">Selecciona una conexión</option>
+                            {
+                                datos?.conexiones?.map((a, b) => (
+                                    <option key={b} value={a.cNombreDispositivo.replace('@c.us', '')}>{a.cNombreDispositivo.replace('@c.us', '') + ' - ' + a.cCategoriaDisposito}</option>
+                                ))
+                            }
+                        </select>
+
+                        <label className='text-sm'>Enviar a</label>
+                        <input type="text" className='w-full border rounded p-2 mt-3 mb-2' placeholder='Número de WhatsApp con código de país' onChange={(e) => setSolicitudCuerpoEnvio(prev => ({...prev, to: e.target.value}))} />
+
+                        <label className='text-sm'>Mensaje :</label>
+                        <input type="text" className='w-full border rounded p-2 mt-3 mb-2' placeholder='Ingresa Mensaje...' onChange={(e) => setSolicitudCuerpoEnvio(prev => ({...prev, message: e.target.value}))}/>                
+                    </>
+                )
+
+                setPropsNuevoChat(datos);                
+                setOpenDialogNuevoChat(true);
+                setLoadOpenDiaplogNuevoChat(false);
+            });
+        }
+    }, [loadOpenDiaplogNuevoChat]);
+
+    /* Pidiendo listado de conexiones */
+
     const handleOpenModal = () => {
         setOpenModal(true)
     }
@@ -1030,46 +1088,8 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
         setOpenModalConsulta(true)
     }
 
-    const handleCrearNuevoChat = async () => {
-        const numpromt = prompt('SOLO AGENCIA - Ingrese el número de WhatsApp del nuevo cliente (con código de país):');
-        if (numpromt) {
-            console.log('Nuevo número ingresado:', numpromt);
-
-            try {
-
-                const back = window.location.href.includes(conexiones.front1) ? conexiones.back1 : conexiones.back2;
-                const request = await fetch(`${back}send-message`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(
-                        {
-                            "mensajes": [
-                                {
-                                    "mensaje": ".",
-                                    "tipomensaje": "texto"
-                                }
-                            ],
-                            "cCliente": numpromt + "@c.us",
-                            "cUsuario": "51942270140@c.us"
-                        }
-                    )
-                });
-
-                const response = await request.json();
-                console.log('Respuesta del servidor:', response);
-
-            } catch (error) {
-
-                console.error('Error al enviar el mensaje de prueba:', error);
-                alert("Error al enviar el mensaje de prueba, revisa la consola para mas detalles.");
-
-            }
-
-        } else {
-            console.log('No se ingresó ningún número.');
-        }
+    const handleCrearNuevoChat = () => {
+        setLoadOpenDiaplogNuevoChat(true);        
     }
 
     const copiarTexto = () => {
@@ -1154,7 +1174,7 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
                                 type="button"
                                 className="bg-lime-400 hover:bg-lime-300 px-4 py-2  shadow border-2 border-lime-400 font-bold text-xs transition cursor-pointer"
                                 value="C. Nuevo Chat"
-                                onClick={() => handleCrearNuevoChat()}
+                                onClick={handleCrearNuevoChat}
                             />
                         </div>
                     )}
@@ -1166,6 +1186,7 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
             {/* Modales */}
             <ModalEnlacePayPal openModal={openModal} setOpenModal={setOpenModal} />
             <ModalConsultarPayPal openModalConsulta={openModalConsulta} setOpenModalConsulta={setOpenModalConsulta} />
+            <Componente_Modal open={openDialogNuevoChat} setOpen={setOpenDialogNuevoChat} props={propsNuevoChat} />
         </div>
 
     )
@@ -1180,7 +1201,7 @@ export default function ContenidoChat({ dataclic, dataclicuser }) {
     return (
         <div className="flex-1 py-4 flex flex-col h-full">
             <Cabecerachat dataclic={dataclic} dataclicuser={dataclicuser} origen={origen} slaapi={slaapi} />
-            <DetalleChat dataclic={dataclic} dataclicuser={dataclicuser} setOrigen={setOrigen} origen={origen} setSlaapi={setSlaapi} slaapi={slaapi}/>
+            <DetalleChat dataclic={dataclic} dataclicuser={dataclicuser} setOrigen={setOrigen} origen={origen} setSlaapi={setSlaapi} slaapi={slaapi} />
         </div>
     )
 }
