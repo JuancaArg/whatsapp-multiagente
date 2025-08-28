@@ -1,6 +1,7 @@
 import { conexiones } from '../dashboard/variables/env';
 
 export const EnvioMensajeWspWeb = async (data) => {
+    console.warn(data)
     try {
         const back = window.location.href.includes(conexiones.front1) ? conexiones.back1 : conexiones.back2;
         const request = await fetch(`${back}send-message`, {
