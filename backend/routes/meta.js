@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {MetaController} from '../Controller/MetaController.js';
+import {EnvioMensajes} from '../services/Meta/EnvioMensajes.js';
 const router = Router();
 
 const verifyToken = process.env.VERIFY_TOKEN || 'my_verify_token';
@@ -22,5 +23,11 @@ router.post('/', (req, res) => {
     res.status(200).end();
   
 });
+
+router.post('/send-message', (req,res)=>{
+
+EnvioMensajes(req.body)
+
+})
 
 export default router;
