@@ -1033,7 +1033,8 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
         from : '',
         to : '',
         message : ''
-    })
+    });
+    const [loadEnvioMensaje,setloadEnvioMensaje] = useState(false)
 
     useEffect(() => {
         if (loadOpenDiaplogNuevoChat) {
@@ -1047,7 +1048,7 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
                     colorIcon: "bg-green-700",
                     colorFondoIcon: "bg-green-200",
                     actionText: "Crear Chat",
-                    onAction: ()=>EnvioMensajeWspWeb(SolicitudCuerpoEnvio) && setOpenDialogNuevoChat(false),
+                    onAction: ()=>setloadEnvioMensaje(true),
                     cancelText: "Cerrar",
                     conexiones: e.data
                 }
@@ -1077,6 +1078,15 @@ function Cabecerachat({ dataclic, dataclicuser, origen, slaapi }) {
             });
         }
     }, [loadOpenDiaplogNuevoChat]);
+    
+    useEffect(() => {
+        if (loadEnvioMensaje) {
+            EnvioMensajeWspWeb(SolicitudCuerpoEnvio);
+            setOpenDialogNuevoChat(false);
+            setloadEnvioMensaje(false);
+        }
+    }, [loadEnvioMensaje]);
+
 
     /* Pidiendo listado de conexiones */
 
