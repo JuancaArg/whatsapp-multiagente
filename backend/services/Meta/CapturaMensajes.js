@@ -7,6 +7,8 @@ export const CapturaMensajes = async (body) => {
 
     try {
         
+        console.log(JSON.stringify(body));
+
         //console.log('Received POST request with body desde CapturaMensajes.js :', JSON.stringify(body));
 
         // Formata el mensaje recibido
@@ -41,7 +43,9 @@ export const CapturaMensajes = async (body) => {
             const res = await DescargaMedia(document)
             console.log('res ', res);
             res?.error === 'si' ? (datamedia = null, cMensaje = res?.mensaje, cTipoMensaje = 'texto') : datamedia = res?.base64;
-        }        
+        }else if (cTipoMensaje === 'Botón'){
+            cMensaje = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.button?.text || body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.button?.payload;
+        }      
 
         if (isMe){
             // Solo continua el proceso si el mensaje tiene como status 'sent'
@@ -51,9 +55,9 @@ export const CapturaMensajes = async (body) => {
                 const dataMensaje = await ObtieneDataMensajeisMe(id);
 
                 cNumberCliente = body?.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]?.recipient_id;
-                cTipoMensaje = RetornoTipoMensaje(dataMensaje.res.tipomensaje);
-                cMensaje = ['image','document'].includes(cTipoMensaje) ? null : dataMensaje.res.message ;
-                datamedia = dataMensaje.res.message.data || null;
+                cTipoMensaje = dataMensaje?.res?.tipomensaje ? RetornoTipoMensaje(dataMensaje?.res?.tipomensaje) : 'texto';
+                cMensaje = ['image','document'].includes(cTipoMensaje) ? null : dataMensaje?.res?.message || 'No se encontro Mensaje';
+                datamedia = dataMensaje?.res?.message?.data || null;
                 nIdMensaje = id;
             }
             else {
