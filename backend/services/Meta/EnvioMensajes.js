@@ -97,7 +97,7 @@ const sendImageandText = async (to, mensaje, imagen, data) => {
             }
 
             //console.log('resonde - ', json.body);
-            const req = await InsertaRegistroCollecion(process.env.FIREBASE_COLECCION_MENSAJESAPI, json , JSON.parse(response.body).messages[0].id)
+            const req = await InsertaRegistroCollecion(process.env.FIREBASE_COLECCION_MENSAJESAPI, json , JSON.parse(response.body).messages?.[0]?.id || 'No Encontrado')
             });
         });        
     } catch (error) {
