@@ -25,7 +25,9 @@ if (window.location.href.includes(conexiones.front1)) {
 
 const navigation = [
     { name: 'Inicio', current: true },
-    { name: 'Conexiones', current: false }//,
+    { name: 'Conexiones', current: false },
+    { name : 'Whatsapp API', current: false}
+    //,
     //{ name: 'Respuestas Rapidas', current: false },
     //{ name: 'Integraciones', current: false },
 ]
@@ -108,19 +110,36 @@ export default function Example() {
                                 </div>
                                 <div className="hidden md:block">
                                     <div className="ml-4 flex items-baseline space-x-4">
-                                        {navigation.map((item) => (
-                                            <a
-                                                key={item.name}
-                                                onClick={() => setOpcion(item.name)}
-                                                aria-current={item.current ? 'page' : undefined}
-                                                className={classNames(
-                                                    item.name === opcion ? 'bg-[#3d3d539c] text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                                                    'rounded-md px-3 py-2 text-sm font-medium',
-                                                )}
-                                            >
-                                                {item.name}
-                                            </a>
-                                        ))}
+                                    
+                {navigation.map((item) => (
+                <a
+                    key={item.name}
+                    onClick={() => setOpcion(item.name)}
+                    aria-current={item.current ? "page" : undefined}
+                    className={classNames(
+                    item.name === "Whatsapp API"
+                        ? [
+                            "relative overflow-hidden rounded-md px-4 py-2 text-sm font-bold tracking-wide",
+                            "bg-gradient-to-r from-green-500 via-purple-500 to-indigo-500",
+                            "text-white z-10", // 👈 texto siempre por encima
+                            "drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]", // 👈 sombra marcada para legibilidad
+                            "ring-1 ring-white/20 shadow-md transition-all duration-300 ease-out",
+                            "hover:brightness-105 hover:scale-[1.02] hover:shadow-lg",
+                            "bg-[length:200%_200%] motion-safe:animate-[gradientShift_6s_ease_infinite]",
+                            // capa glass separada con menos opacidad y detrás
+                            "before:absolute before:inset-0 before:rounded-md before:bg-white/10 before:backdrop-blur-sm before:opacity-20 before:-z-10"
+                        ].join(" ")
+                        : item.name === opcion
+                        ? "bg-[#3d3d539c] text-white rounded-md px-3 py-2 text-sm font-medium"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium")
+                    }
+                >
+                    {item.name}
+                </a>
+                ))}
+
+
+
                                     </div>
                                 </div>
                             </div>
