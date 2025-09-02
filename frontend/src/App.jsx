@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import Dashboard from './components/dashboard/index';
 import { Toaster, toast } from 'react-hot-toast';
