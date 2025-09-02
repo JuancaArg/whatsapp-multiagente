@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import pkg from '../../../package.json';
 import { io } from "socket.io-client";
 import { conexiones } from './variables/env';
+import { Link, Outlet } from 'react-router-dom';
 
 /*http://localhost:4000/*/
 
@@ -26,7 +27,7 @@ if (window.location.href.includes(conexiones.front1)) {
 const navigation = [
     { name: 'Inicio', current: true },
     { name: 'Conexiones', current: false },
-    { name : 'Whatsapp API', current: false}
+    { name: 'Whatsapp_API', current: false }
     //,
     //{ name: 'Respuestas Rapidas', current: false },
     //{ name: 'Integraciones', current: false },
@@ -41,7 +42,7 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
-export default function Example() {
+export default function Example({ children }) {
 
     const [conectados, setConectados] = useState(false);
     const [socket, setSocket] = useState(null);
@@ -110,36 +111,32 @@ export default function Example() {
                                 </div>
                                 <div className="hidden md:block">
                                     <div className="ml-4 flex items-baseline space-x-4">
-                                    
-                {navigation.map((item) => (
-                <a
-                    key={item.name}
-                    onClick={() => setOpcion(item.name)}
-                    aria-current={item.current ? "page" : undefined}
-                    className={classNames(
-                    item.name === "Whatsapp API"
-                        ? [
-                            "relative overflow-hidden rounded-md px-4 py-2 text-sm font-bold tracking-wide",
-                            "bg-gradient-to-r from-green-500 via-purple-500 to-indigo-500",
-                            "text-white z-10", // 👈 texto siempre por encima
-                            "drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]", // 👈 sombra marcada para legibilidad
-                            "ring-1 ring-white/20 shadow-md transition-all duration-300 ease-out",
-                            "hover:brightness-105 hover:scale-[1.02] hover:shadow-lg",
-                            "bg-[length:200%_200%] motion-safe:animate-[gradientShift_6s_ease_infinite]",
-                            // capa glass separada con menos opacidad y detrás
-                            "before:absolute before:inset-0 before:rounded-md before:bg-white/10 before:backdrop-blur-sm before:opacity-20 before:-z-10"
-                        ].join(" ")
-                        : item.name === opcion
-                        ? "bg-[#3d3d539c] text-white rounded-md px-3 py-2 text-sm font-medium"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium")
-                    }
-                >
-                    {item.name}
-                </a>
-                ))}
-
-
-
+                                        {navigation.map((item) => (
+                                        <Link key={item.name} to={item.name} >
+                                            <a
+                                                onClick={() => setOpcion(item.name)}
+                                                className={classNames(
+                                                    item.name === "Whatsapp API"
+                                                        ? [
+                                                            "relative overflow-hidden rounded-md px-4 py-2 text-sm font-bold tracking-wide",
+                                                            "bg-gradient-to-r from-green-500 via-purple-500 to-indigo-500",
+                                                            "text-white z-10", // 👈 texto siempre por encima
+                                                            "drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]", // 👈 sombra marcada para legibilidad
+                                                            "ring-1 ring-white/20 shadow-md transition-all duration-300 ease-out",
+                                                            "hover:brightness-105 hover:scale-[1.02] hover:shadow-lg",
+                                                            "bg-[length:200%_200%] motion-safe:animate-[gradientShift_6s_ease_infinite]",
+                                                            // capa glass separada con menos opacidad y detrás
+                                                            "before:absolute before:inset-0 before:rounded-md before:bg-white/10 before:backdrop-blur-sm before:opacity-20 before:-z-10"
+                                                        ].join(" ")
+                                                        : item.name === opcion
+                                                            ? "bg-[#3d3d539c] text-white rounded-md px-3 py-2 text-sm font-medium"
+                                                            : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium")
+                                                }
+                                            >
+                                                {item.name}
+                                            </a>
+                                        </Link>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -247,7 +244,7 @@ export default function Example() {
                     <p className="text-white text-xs sm:text-sm font-semibold text-center">
                         {conectados ? (
                             '✅ Estás conectado y tienes los permisos de acceso necesarios'
-                        ) : window.location.href.includes(conexiones.front1) ? (                            
+                        ) : window.location.href.includes(conexiones.front1) ? (
                             <>
                                 Estás presencial, pero te faltan los permisos de acceso ➡️{' '}
                                 <a
@@ -275,7 +272,7 @@ export default function Example() {
                     </p>
                 </div>
 
-                {controladormenu}
+                { children || <Outlet/> }
             </div>
         </>
     )
