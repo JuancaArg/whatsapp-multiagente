@@ -25,9 +25,9 @@ if (window.location.href.includes(conexiones.front1)) {
 
 
 const navigation = [
-    { name: 'Inicio', current: true },
-    { name: 'Conexiones', current: false },
-    { name: 'Whatsapp_API', current: false }
+    { name: 'Inicio', current: true , path: 'inicio' },
+    { name: 'Conexiones', current: false , path: 'conexiones' },
+    { name: 'Whatsapp API', current: false  , path: 'wspapi' }
     //,
     //{ name: 'Respuestas Rapidas', current: false },
     //{ name: 'Integraciones', current: false },
@@ -112,11 +112,11 @@ export default function Example({ children }) {
                                 <div className="hidden md:block">
                                     <div className="ml-4 flex items-baseline space-x-4">
                                         {navigation.map((item) => (
-                                        <Link key={item.name} to={item.name} >
+                                        <Link key={item.name} to={item.path} >
                                             <a
                                                 onClick={() => setOpcion(item.name)}
                                                 className={classNames(
-                                                    item.name === "Whatsapp API"
+                                                    item.name == "Whatsapp API"
                                                         ? [
                                                             "relative overflow-hidden rounded-md px-4 py-2 text-sm font-bold tracking-wide",
                                                             "bg-gradient-to-r from-green-500 via-purple-500 to-indigo-500",
