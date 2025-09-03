@@ -64,19 +64,10 @@ export async function ObtieneWspConectados(io) {
                 }),
                 puppeteer: {
                     // Ejecutar en modo headless (sin interfaz gráfica)
+                    executablePath: "/usr/bin/google-chrome-stable",
                     headless: true,
                     args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-accelerated-2d-canvas',
-                        '--disable-gpu',
-                        '--no-first-run',
-                        '--no-zygote',
-                        '--single-process',
-                        '--disable-infobars',
-                        '--disable-web-security',
-                        '--disable-features=IsolateOrigins,site-per-process',
+                        '--no-sandbox'
                     ],
                     timeout: 0
                 }
@@ -108,7 +99,8 @@ export async function ObtieneWspConectados(io) {
                 });
 
                 cl.on('auth_failure', (error) => {
-                    console.error(`Fallo en la autenticación para ${element.cNombreDispositivo}:`, error);
+                    console.error(`Fallo en la autenticación para ${element.cNombreDispositivo}:`,
+                        error);
                     reject(error);
                 });
 
@@ -134,39 +126,56 @@ export async function ObtieneWspConectados(io) {
                     try {
 
                         // Validando actualizacion de Whatsapp
-                        const newfrom = await cl.getContactLidAndPhone(message.from) || message.from
-                        const newto  = await cl.getContactLidAndPhone(message.to) || message.to
 
-                        const from = Array.isArray(newfrom) && newfrom?.[0]?.lid 
-                                    ? newfrom[0].pn || message.from || 'No definido' 
-                                    : message.from || 'No definido';
-                        
-                        const to = Array.isArray(newto) && newto?.[0]?.lid 
-                                    ? newto[0].pn || message.to || 'No definido' 
-                                    : message.to || 'No definido'
+                        let newfrom,newto
+
+                        try {
+                            newfrom = await cl.getContactLidAndPhone(message.from) || message.from;
+                        } catch (e) {
+                            console.error(`No existe ContactLic From -> ${message.from}`, e);
+                            newfrom = message.from;
+                        }
+
+                        try {
+                            newto = await cl.getContactLidAndPhone(message.to) || message.to;
+                        } catch (e) {
+                            console.error(`No existe ContactLic To -> ${message.to}`, e);
+                            newto = message.to;
+                        }   
+
+                        const from = Array.isArray(newfrom) && newfrom?.[0]?.lid ?
+                            newfrom[0].pn || message.from || 'No definido' :
+                            message.from || 'No definido';
+
+                        const to = Array.isArray(newto) && newto?.[0]?.lid ?
+                            newto[0].pn || message.to || 'No definido' :
+                            message.to || 'No definido'
 
                         //console.warn('Mensaje detectado por whatsappService.js:', dayjs().format() , message.body);
 
                         const isFromMe = message.fromMe === false;
-                        await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? to : from, isFromMe ? from : to);
+                        await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS,
+                            isFromMe ? to : from, isFromMe ? from : to);
 
-                
+
 
                         const data = {
                             from: from,
-                            to: to,                            
+                            to: to,
                             fromMe: message.fromMe || false,
                             type: message.type || 'No definido',
-                            body: message.body || message._data?.list?.description || 'No definido',
+                            body: message.body || message._data?.list?.description ||
+                                'No definido',
                             id: message.id.id || 'No definido',
                             time: new Date().toISOString(),
                             datamedia: null,
                         };
-                        
+
 
                         if (message.hasMedia) {
                             const media = await message.downloadMedia();
-                            if (media && ['image', 'sticker', 'ptt', 'audio'].includes(message.type)) {
+                            if (media && ['image', 'sticker', 'ptt', 'audio'].includes(message
+                                    .type)) {
                                 data.datamedia = media.data;
                             } else if (message.type === 'document') {
                                 data.datamedia = media.data;
@@ -197,7 +206,8 @@ export async function ObtieneWspConectados(io) {
                                 redirect: 'follow'
                             };
 
-                            fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
+                            fetch("https://updatenotion-31715056154.me-west1.run.app",
+                                    requestOptions)
                                 .catch(error => console.log('error', error));
 
                             sendWebhookNotification(raw);
@@ -268,7 +278,7 @@ export async function enviaMensaje(mensaje, cliente, usuario, tipomensaje) {
         } else if (tipomensaje === 'imagen' || tipomensaje === 'pdf' || tipomensaje === 'audio') {
             const body = new MessageMedia(mensaje.mimetype, mensaje.data, mensaje.filename);
             try {
-                 await cl.sendMessage(cliente, body)
+                await cl.sendMessage(cliente, body)
             } catch (e) {
                 const isLid = await cl.getContactLidAndPhone(cliente);
                 const nuevoCliente = isLid?.[0]?.lid ? isLid[0].lid : cliente;
@@ -310,19 +320,10 @@ export async function createClient(DeviceName, io) {
         }),
         puppeteer: {
             // Ejecutar en modo headless (sin interfaz gráfica)
+            executablePath: "/usr/bin/google-chrome-stable",
             headless: true,
             args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--disable-gpu',
-                '--no-first-run',
-                '--no-zygote',
-                '--single-process',
-                '--disable-infobars',
-                '--disable-web-security',
-                '--disable-features=IsolateOrigins,site-per-process',
+                '--no-sandbox'
             ],
             timeout: 0
         }
@@ -366,89 +367,104 @@ export async function createClient(DeviceName, io) {
         });
     });
 
-                cl.on('message_create', async (message) => {
-                    try {
+    client.on('message_create', async (message) => {
+        try {
 
-                        // Validando actualizacion de Whatsapp
-                        const newfrom = await cl.getContactLidAndPhone(message.from) || message.from
-                        const newto  = await cl.getContactLidAndPhone(message.to) || message.to
+            // Validando actualizacion de Whatsapp
 
-                        const from = Array.isArray(newfrom) && newfrom?.[0]?.lid 
-                                    ? newfrom[0].pn || message.from || 'No definido' 
-                                    : message.from || 'No definido';
-                        
-                        const to = Array.isArray(newto) && newto?.[0]?.lid 
-                                    ? newto[0].pn || message.to || 'No definido' 
-                                    : message.to || 'No definido'
+            let newfrom,newto
 
-                        //console.warn('Mensaje detectado por whatsappService.js:', dayjs().format() , message.body);
+            try {
+                newfrom = await client.getContactLidAndPhone(message.from) || message.from;
+            } catch (e) {
+                console.error(`No existe ContactLic From -> ${message.from}`, e);
+                newfrom = message.from;
+            }
 
-                        const isFromMe = message.fromMe === false;
-                        await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? to : from, isFromMe ? from : to);
+            try {
+                newto = await client.getContactLidAndPhone(message.to) || message.to;
+            } catch (e) {
+                console.error(`No existe ContactLic To -> ${message.to}`, e);
+                newto = message.to;
+            }   
 
-                
+            const from = Array.isArray(newfrom) && newfrom?.[0]?.lid ?
+                newfrom[0].pn || message.from || 'No definido' :
+                message.from || 'No definido';
 
-                        const data = {
-                            from: from,
-                            to: to,                            
-                            fromMe: message.fromMe || false,
-                            type: message.type || 'No definido',
-                            body: message.body || message._data?.list?.description || 'No definido',
-                            id: message.id.id || 'No definido',
-                            time: new Date().toISOString(),
-                            datamedia: null,
-                        };
-                        
+            const to = Array.isArray(newto) && newto?.[0]?.lid ?
+                newto[0].pn || message.to || 'No definido' :
+                message.to || 'No definido'
 
-                        if (message.hasMedia) {
-                            const media = await message.downloadMedia();
-                            if (media && ['image', 'sticker', 'ptt', 'audio'].includes(message.type)) {
-                                data.datamedia = media.data;
-                            } else if (message.type === 'document') {
-                                data.datamedia = media.data;
-                                data.body = media.filename || 'No definido';
-                            }
-                        }
+            //console.warn('Mensaje detectado por whatsappService.js:', dayjs().format() , message.body);
 
-                        await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
-                        // Logica para mandar mensaje a Microservicio de Google 
-                        /************ */
-                        try {
+            const isFromMe = message.fromMe === false;
+            await InsertaContacto(process.env.FIREBASE_COLECCION_CONTACTOS, isFromMe ? to : from,
+                isFromMe ? from : to);
 
-                            //console.log(data.body, data.to);
 
-                            var myHeaders = new Headers();
-                            myHeaders.append("Content-Type", "application/json");
 
-                            var raw = JSON.stringify({
-                                "body": data.body,
-                                "to": data.to,
-                                "from": data.from
-                            });
+            const data = {
+                from: from,
+                to: to,
+                fromMe: message.fromMe || false,
+                type: message.type || 'No definido',
+                body: message.body || message._data?.list?.description || 'No definido',
+                id: message.id.id || 'No definido',
+                time: new Date().toISOString(),
+                datamedia: null,
+            };
 
-                            var requestOptions = {
-                                method: 'POST',
-                                headers: myHeaders,
-                                body: raw,
-                                redirect: 'follow'
-                            };
 
-                            fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
-                                .catch(error => console.log('error', error));
+            if (message.hasMedia) {
+                const media = await message.downloadMedia();
+                if (media && ['image', 'sticker', 'ptt', 'audio'].includes(message.type)) {
+                    data.datamedia = media.data;
+                } else if (message.type === 'document') {
+                    data.datamedia = media.data;
+                    data.body = media.filename || 'No definido';
+                }
+            }
 
-                            sendWebhookNotification(raw);
+            await addReg(process.env.FIREBASE_COLECCION_CHATS, data);
+            // Logica para mandar mensaje a Microservicio de Google 
+            /************ */
+            try {
 
-                        } catch (error) {
-                            console.error('Error con el microservicio', error);
-                            // No lanzamos error para que el proceso siga
-                        }
+                //console.log(data.body, data.to);
 
-                        /************ */
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
 
-                    } catch (error) {
-                        console.error('Error procesando mensaje:', error);
-                    }
+                var raw = JSON.stringify({
+                    "body": data.body,
+                    "to": data.to,
+                    "from": data.from
                 });
+
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+
+                fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
+                    .catch(error => console.log('error', error));
+
+                sendWebhookNotification(raw);
+
+            } catch (error) {
+                console.error('Error con el microservicio', error);
+                // No lanzamos error para que el proceso siga
+            }
+
+            /************ */
+
+        } catch (error) {
+            console.error('Error procesando mensaje:', error);
+        }
+    });
 
     client.on('disconnected', async (reason) => {
         console.log('Cliente desconectado. Motivo:', reason);

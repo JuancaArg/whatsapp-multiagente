@@ -7,7 +7,7 @@ export const CapturaMensajes = async (body) => {
 
     try {
         
-        console.log(JSON.stringify(body));
+        //console.log(JSON.stringify(body));
 
         //console.log('Received POST request with body desde CapturaMensajes.js :', JSON.stringify(body));
 
