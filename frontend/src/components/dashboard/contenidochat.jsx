@@ -834,7 +834,7 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi, sla
 
             if (ordenado?.[ordenado.length - 1]) {
                 const filtro = ordenado.filter(i=>!i.fromMe)
-                const ultimaHora = new Date(filtro[filtro.length - 1].time);
+                const ultimaHora = new Date(filtro?.[filtro.length - 1]?.time) || new Date();
                 const ahora = new Date();
 
                 // Diferencia en milisegundos
