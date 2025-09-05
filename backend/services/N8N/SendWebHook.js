@@ -1,3 +1,6 @@
+import dotenv from 'dotenv'
+dotenv.config();
+
 export function sendWebhookNotification(data) {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -11,8 +14,8 @@ export function sendWebhookNotification(data) {
         redirect: 'follow'
     };
 
-    fetch("http://192.168.100.100:5678/webhook/4a969261-b7d9-42a8-9f5c-47ab967a666c", requestOptions)
-        .catch(error => console.log('error', error));
+    //fetch(`${process.env.URL_N8N_WEBHOOK}`, requestOptions)
+    //    .catch(error => console.log('error', error));
 }
 
 export function InsertBigQuery(data){
@@ -27,6 +30,6 @@ export function InsertBigQuery(data){
                     redirect: 'follow'
                 };
     
-    fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
-                    .catch(error => console.log('error', error));
+    //fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
+    //                .catch(error => console.log('error', error));
 }

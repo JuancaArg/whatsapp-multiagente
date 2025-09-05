@@ -75,7 +75,7 @@ export const CapturaMensajes = async (body) => {
             nIdMensaje,
             dFechaMensaje,
             Origen
-        };
+        };        
 
         //console.log('📩 Formatted message data:', data);
         InsertaMensajeFirebase(data);

@@ -830,11 +830,11 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi, sla
             })
             const ordenado = newfilter.sort((a, b) => new Date(a.time) - new Date(b.time));
             const origen = ordenado.find(i => i?.origen?.includes('API')) ? true : false;
-            console.log('Origen del chat:', ordenado);
             /* Hota */
 
             if (ordenado?.[ordenado.length - 1]) {
-                const ultimaHora = new Date(ordenado[ordenado.length - 1].time);
+                const filtro = ordenado.filter(i=>!i.fromMe)
+                const ultimaHora = new Date(filtro[filtro.length - 1].time);
                 const ahora = new Date();
 
                 // Diferencia en milisegundos
@@ -899,7 +899,7 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi, sla
     useEffect(() => {
         socket.on('list-clients-content-chat-added', (e) => {
 
-            console.log('Nuevo mensaje recibido:', e.data);
+            //console.log('Nuevo mensaje recibido:', e.data);
 
             // filtra e.data donde dataclicRef y dataclicuserRef coincidan
 
@@ -909,7 +909,7 @@ function DetalleChat({ dataclic, dataclicuser, setOrigen, origen, setSlaapi, sla
                 (mensaje.from === dataclicRef.current && mensaje.to === dataclicuserRef.current) ||
                 (mensaje.from === dataclicuserRef.current && mensaje.to === dataclicRef.current);
 
-            console.log('Nuevo mensaje filtrado:', esEntreUsuarios);
+            //console.log('Nuevo mensaje filtrado:', esEntreUsuarios);
 
             // Usar las referencias para acceder a los valores más actuales 
 
