@@ -14,8 +14,8 @@ export function sendWebhookNotification(data) {
         redirect: 'follow'
     };
 
-    //fetch(`${process.env.URL_N8N_WEBHOOK}`, requestOptions)
-    //    .catch(error => console.log('error', error));
+    fetch(`${process.env.URL_N8N_WEBHOOK}`, requestOptions)
+        .catch(error => console.log('error', error));
 }
 
 export function InsertBigQuery(data){
@@ -30,6 +30,6 @@ export function InsertBigQuery(data){
                     redirect: 'follow'
                 };
     
-    //fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
-    //                .catch(error => console.log('error', error));
+    fetch("https://updatenotion-31715056154.me-west1.run.app", requestOptions)
+                    .catch(error => console.log('error', error));
 }
