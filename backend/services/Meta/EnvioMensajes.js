@@ -86,7 +86,7 @@ const sendImageandText = async (to, mensaje, imagen, data, phoneId) => {
 
         const IdUpload = await ApiUploadImage(imagen,phoneId);
 
-        console.log("type",type);
+        //console.log("type",type);
         
         return new Promise((resolve, reject) => {
             var options = {
@@ -132,7 +132,7 @@ const ApiUploadImage = (payload, phoneId) => {
 
     try{
 
-        console.log('Iniciando ApiUploadImage');
+        //console.log('Iniciando ApiUploadImage');
 
         return new Promise((resolve, reject) => {
             const base64Data = payload.data.replace(/^data:.+;base64,/, "");
