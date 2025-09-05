@@ -5,9 +5,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Crear usuario no-root
 RUN adduser --disabled-password --gecos "" appuser
 
-# Instalar dependencias del sistema necesarias para Chromium
+# Instalar dependencias necesarias del sistema
 RUN apt-get update && apt-get install -y \
     wget \
+    gnupg \
     ca-certificates \
     fonts-liberation \
     libappindicator3-1 \
@@ -30,8 +31,15 @@ RUN apt-get update && apt-get install -y \
     libglu1-mesa \
     libpangocairo-1.0-0 \
     libpango-1.0-0 \
-    --no-install-recommends && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    --no-install-recommends
+
+# Descargar e instalar Google Chrome estable
+RUN wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install -y /tmp/chrome.deb && \
+    rm /tmp/chrome.deb
+
+# Limpiar caché de apt
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Establecer carpeta de trabajo y copiar archivos
 WORKDIR /app
@@ -41,10 +49,11 @@ COPY . .
 RUN chown -R appuser:appuser /app
 
 # Instalar dependencias Node como root antes de cambiar de usuario
-RUN npm install
+RUN npm install -g nodemon
+
 
 # ✅ Cambiar al nuevo usuario no-root
 USER appuser
 
-EXPOSE 8000
-CMD ["npm","run","dev"]
+EXPOSE 4000
+CMD ["nodemon", "index.js"]

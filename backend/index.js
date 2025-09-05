@@ -323,7 +323,6 @@ app.post('/get-last-chats-agenciall', async (req, res) => {
 app.post('/notification', (req, res) => {
 
     io.emit('notification', req.body);
-
     return res.status(200).json({
         message: 'Notification sent successfully'
     });

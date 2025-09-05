@@ -2,16 +2,22 @@ import request from 'request';
 import fs from 'fs';
 import {InsertaRegistroCollecion} from '../../services/firebase.js';
 import dotenv from 'dotenv'
+import { Datos_ObtieneIdentificar } from './datos.js';
 dotenv.config();
 
-export const EnvioMensajes = (data) => {
+export const EnvioMensajes = async (data) => {
 
     try {
 
+        const datoswaba = await Datos_ObtieneIdentificar();
+        const meWaba = datoswaba.find(i => data.cUsuario.includes(i.phonenumber));  
+        const phoneId = !Array.isArray(meWaba) && meWaba?.phoneId
+        if(!phoneId) return console.log('Alerta: Duplicidad o no se encontró waba - EnvioMensajes.js');        
+
         if (data.tipomensaje === 'texto'){
-            SendTextSimple(data.cCliente, data.message, data);
+            SendTextSimple(data.cCliente, data.message, data, phoneId);
         }else if(data.tipomensaje === 'imagen' || data.tipomensaje === 'pdf'){
-            sendImageandText(data.cCliente, null , data.message, data);
+            sendImageandText(data.cCliente, null , data.message, data, phoneId);
         }
 
     } catch (error) {
@@ -22,14 +28,14 @@ export const EnvioMensajes = (data) => {
 
 }
 
-const SendTextSimple = (to,mensaje,data) => {
+const SendTextSimple = (to,mensaje,data,phoneId) => {
 
     try{
-    
+
         return new Promise((resolve, reject) => {
             var options = {
             'method': 'POST',
-            'url': 'https://graph.facebook.com/v22.0/717333071471269/messages',
+            'url': `https://graph.facebook.com/v22.0/${phoneId}/messages`,
             'headers': {
                 'Content-Type': ['application/json', 'application/json'],
                 'Authorization': 'Bearer '+ process.env.META_WHATSAPP_TOKEN
@@ -60,7 +66,7 @@ const SendTextSimple = (to,mensaje,data) => {
     }
 }
 
-const sendImageandText = async (to, mensaje, imagen, data) => {
+const sendImageandText = async (to, mensaje, imagen, data, phoneId) => {
 
     try {
 
@@ -68,12 +74,12 @@ const sendImageandText = async (to, mensaje, imagen, data) => {
 
         // Generar el payload
 
-        const IdUpload = await ApiUploadImage(imagen);
+        const IdUpload = await ApiUploadImage(imagen,phoneId);
         
         return new Promise((resolve, reject) => {
             var options = {
             'method': 'POST',
-            'url': 'https://graph.facebook.com/v22.0/717333071471269/messages',
+            'url': `https://graph.facebook.com/v22.0/${phoneId}/messages`,
             'headers': {
                 'Content-Type': ['application/json', 'application/json']
                 ,'Authorization': 'Bearer '+ process.env.META_WHATSAPP_TOKEN
@@ -119,13 +125,13 @@ const ApiUploadImage = (payload) => {
         return new Promise((resolve, reject) => {
             const base64Data = payload.data.replace(/^data:.+;base64,/, "");
             const buffer = Buffer.from(base64Data, "base64");
-            const filepath = 'images/' + payload.filename;
+            const filepath = 'public/images/' + payload.filename;
 
             fs.writeFileSync(filepath, buffer);
 
             const options = {
                 method: 'POST',
-                url: 'https://graph.facebook.com/v22.0/717333071471269/media',
+                url: `https://graph.facebook.com/v22.0/${phoneId}/media`,
                 headers: {
                     'Authorization': 'Bearer ' + process.env.META_WHATSAPP_TOKEN
                 },
