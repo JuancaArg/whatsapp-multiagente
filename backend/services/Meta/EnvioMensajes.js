@@ -16,7 +16,7 @@ export const EnvioMensajes = async (data) => {
 
         if (data.tipomensaje === 'texto'){
             SendTextSimple(data.cCliente, data.message, data, phoneId);
-        }else if(data.tipomensaje === 'imagen' || data.tipomensaje === 'pdf'){
+        }else if(data.tipomensaje === 'imagen' || data.tipomensaje === 'pdf'|| data.tipomensaje === 'audio'){
             sendImageandText(data.cCliente, null , data.message, data, phoneId);
         }
 
@@ -77,11 +77,16 @@ const sendImageandText = async (to, mensaje, imagen, data, phoneId) => {
 
     try {
 
-        const type  = data.tipomensaje === 'imagen' ? 'image' : 'document';
+        const type  = 
+            data.tipomensaje === 'imagen' ? 'image' 
+            : data.tipomensaje === 'audio' ? 'audio' :
+                'document';
 
         // Generar el payload
 
         const IdUpload = await ApiUploadImage(imagen,phoneId);
+
+        console.log("type",type);
         
         return new Promise((resolve, reject) => {
             var options = {
