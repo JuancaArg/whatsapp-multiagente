@@ -53,12 +53,19 @@ const SendTextSimple = (to,mensaje,data,phoneId) => {
 
             };
             request(options, async function (error, response) {
-            if (error) throw new Error(error);
+            if (error) return console.log('Error Enviamensaje -> ', error);
             const json = {
                 body : JSON.parse(response.body),
                 res : data
             }
-            const req = await InsertaRegistroCollecion(process.env.FIREBASE_COLECCION_MENSAJESAPI, json , JSON.parse(response.body).messages[0].id)
+            console.log(JSON.parse(response.body))
+            try {
+                const req = await InsertaRegistroCollecion(process.env.FIREBASE_COLECCION_MENSAJESAPI, json , JSON.parse(response.body).messages?.[0]?.id)    
+            } catch (error) {
+                console.log('Error en req | EnvioMensaje.js ->', error)
+                console.log('El Mensaje que genero el error ->', JSON.parse(response.body).messages)
+            }
+            
             });
         });
     }catch(e){
@@ -116,7 +123,7 @@ const sendImageandText = async (to, mensaje, imagen, data, phoneId) => {
 
 }
 
-const ApiUploadImage = (payload) => {
+const ApiUploadImage = (payload, phoneId) => {
 
     try{
 
@@ -125,7 +132,7 @@ const ApiUploadImage = (payload) => {
         return new Promise((resolve, reject) => {
             const base64Data = payload.data.replace(/^data:.+;base64,/, "");
             const buffer = Buffer.from(base64Data, "base64");
-            const filepath = 'public/images/' + payload.filename;
+            const filepath = 'images/' + payload.filename;
 
             fs.writeFileSync(filepath, buffer);
 

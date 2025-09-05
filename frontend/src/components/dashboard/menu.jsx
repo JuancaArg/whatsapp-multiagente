@@ -112,8 +112,7 @@ export default function Example({ children }) {
                                 <div className="hidden md:block">
                                     <div className="ml-4 flex items-baseline space-x-4">
                                         {navigation.map((item) => (
-                                        <Link key={item.name} to={item.path} >
-                                            <a
+                                        <Link key={item.name} to={item.path} 
                                                 onClick={() => setOpcion(item.name)}
                                                 className={classNames(
                                                     item.name == "Whatsapp API"
@@ -131,10 +130,8 @@ export default function Example({ children }) {
                                                         : item.name === opcion
                                                             ? "bg-[#3d3d539c] text-white rounded-md px-3 py-2 text-sm font-medium"
                                                             : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium")
-                                                }
-                                            >
-                                                {item.name}
-                                            </a>
+                                                }>                                            
+                                                {item.name}                                       
                                         </Link>
                                         ))}
                                     </div>
